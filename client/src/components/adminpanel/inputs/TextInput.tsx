@@ -19,9 +19,9 @@ export default function TextInput({
 
       <input
         type={type}
-        placeholder={placeholder || label}
-        className="p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+        placeholder={placeholder}
         onChange={(e) => onChange?.(e.target.value)}
+        className="p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
       />
     </div>
   );

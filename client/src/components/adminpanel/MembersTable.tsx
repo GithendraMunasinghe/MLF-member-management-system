@@ -45,7 +45,7 @@ export default function MembersTable() {
   const [searchTerm, setSearchTerm] = useState("");
 
   const openEditModal = (member: Member) => {
-    setEditMemberName(member.name);
+    setEditMemberName(member.personalInfo?.fullName || "");
     setEditMemberRegNo(member.regNo.toString());
     setEditMemberImagePreview(member.photo); // existing image URL
     setEditMemberImageFile(null);
@@ -208,7 +208,7 @@ export default function MembersTable() {
             {paginatedMembers.length > 0 ? (
               paginatedMembers.map((member) => (
                 <tr key={member._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-2 border-b">{member.name}</td>
+                  <td className="px-6 py-2 border-b">{member.personalInfo?.fullName || "-"}</td>
                   <td className="px-6 py-2 border-b">{member.regNo}</td>
                   <td className="px-6 py-2 border-b">
                     {new Date(member.createdAt).toLocaleDateString()}

@@ -185,85 +185,97 @@ export const updateMember = async (req, res) => {
     const data = req.body;
     const updateFields = {};
 
-    // Helper to handle nested fields safely
+    const safeParse = (value) => {
+      try {
+        return value ? JSON.parse(value) : {};
+      } catch {
+        return {};
+      }
+    };
+
+    const clean = (value) => {
+      return value === "" ? undefined : value;
+    };
+
+    const cleanNumber = (value) => {
+      return value === "" || value === undefined || value === null
+        ? undefined
+        : Number(value);
+    };
+
+    const personalInfo = safeParse(data.personalInfo);
+    const address = safeParse(data.address);
+    const contact = safeParse(data.contact);
+    const business = safeParse(data.business);
+    const professional = safeParse(data.professional);
+
     const setNested = (objPath, value) => {
       if (value !== undefined) {
         updateFields[objPath] = value;
       }
     };
 
-    // 🔹 Basic Fields
-    setNested("formType", data.formType);
-    setNested("organizationType", data.organizationType);
-    setNested("event", data.event);
-    setNested("coordinator", data.coordinator);
-    setNested("regNo", data.regNo);
-    setNested("batchNumber", data.batchNumber);
-    setNested("registeredYear", data.registeredYear);
+    // Basic Fields
+    setNested("status", clean(data.status));
+    setNested("formType", clean(data.formType));
+    setNested("organizationType", clean(data.organizationType));
 
-    // 🔹 Personal Info
-    if (data.personalInfo) {
-      setNested("personalInfo.fullName", data.personalInfo.fullName);
-      setNested("personalInfo.certificateName", data.personalInfo.certificateName);
-      setNested("personalInfo.nameWithInitials", data.personalInfo.nameWithInitials);
-      setNested("personalInfo.nicNumber", data.personalInfo.nicNumber);
-      setNested("personalInfo.passportNumber", data.personalInfo.passportNumber);
-      setNested("personalInfo.drivingLicense", data.personalInfo.drivingLicense);
-      setNested("personalInfo.gender", data.personalInfo.gender);
-      setNested("personalInfo.maritalStatus", data.personalInfo.maritalStatus);
-      setNested("personalInfo.dateOfBirth", data.personalInfo.dateOfBirth);
-    }
+    setNested("organizationId", clean(data.organizationId));
+    setNested("eventId", clean(data.eventId));
+    setNested("coordinatorId", clean(data.coordinatorId));
 
-    // 🔹 Address Info
-    if (data.address) {
-      setNested("address.permanentAddress", data.address.permanentAddress);
-      setNested("address.province", data.address.province);
-      setNested("address.district", data.address.district);
-      setNested("address.divisionalSecretariat", data.address.divisionalSecretariat);
-      setNested("address.gramaNiladhariDivision", data.address.gramaNiladhariDivision);
-      setNested("address.policeDivision", data.address.policeDivision);
-    }
+    setNested("regNo", clean(data.regNo));
+    setNested("batchNumber", clean(data.batchNumber));
+    setNested("registeredYear", clean(data.registeredYear));
 
-    // 🔹 Contact Info
-    if (data.contact) {
-      setNested("contact.mobilePhone", data.contact.mobilePhone);
-      setNested("contact.whatsappNumber", data.contact.whatsappNumber);
-      setNested("contact.email", data.contact.email);
-    }
+    // Personal Info
+    setNested("personalInfo.fullName", clean(personalInfo.fullName));
+    setNested("personalInfo.certificateName", clean(personalInfo.certificateName));
+    setNested("personalInfo.nameWithInitials", clean(personalInfo.nameWithInitials));
+    setNested("personalInfo.nicNumber", clean(personalInfo.nicNumber));
+    setNested("personalInfo.passportNumber", clean(personalInfo.passportNumber));
+    setNested("personalInfo.drivingLicense", clean(personalInfo.drivingLicense));
+    setNested("personalInfo.gender", clean(personalInfo.gender));
+    setNested("personalInfo.maritalStatus", clean(personalInfo.maritalStatus));
+    setNested("personalInfo.dateOfBirth", clean(personalInfo.dateOfBirth));
 
-    // 🔹 Professional Info
-    if (data.professional) {
-      setNested("professional.jobStatus", data.professional.jobStatus);
-      setNested("professional.workExperience", data.professional.workExperience);
-      setNested("professional.workplaceAddress", data.professional.workplaceAddress);
-    }
+    // Address Info
+    setNested("address.permanentAddress", clean(address.permanentAddress));
+    setNested("address.province", clean(address.province));
+    setNested("address.district", clean(address.district));
+    setNested("address.divisionalSecretariat", clean(address.divisionalSecretariat));
+    setNested("address.gramaNiladhariDivision", clean(address.gramaNiladhariDivision));
+    setNested("address.policeDivision", clean(address.policeDivision));
 
-    // 🔹 Business Info
-    if (data.business) {
-      setNested("business.hasBusiness", data.business.hasBusiness);
-      setNested("business.numberOfBusinesses", data.business.numberOfBusinesses);
-      setNested("business.name", data.business.name);
-      setNested("business.about", data.business.about);
-      setNested("business.registrationNumber", data.business.registrationNumber);
-      setNested("business.contactNumber", data.business.contactNumber);
-      setNested("business.email", data.business.email);
-      setNested("business.website", data.business.website);
-      setNested("business.startedYear", data.business.startedYear);
-      setNested("business.address", data.business.address);
-      setNested("business.numberOfBranches", data.business.numberOfBranches);
-      setNested("business.portalName", data.business.portalName);
-      setNested("business.grade", data.business.grade);
-    }
+    // Contact Info
+    setNested("contact.mobilePhone", clean(contact.mobilePhone));
+    setNested("contact.whatsappNumber", clean(contact.whatsappNumber));
+    setNested("contact.email", clean(contact.email));
 
-    // 🔹 Organization Title
-    setNested("organization.title", data.title);
+    // Professional Info
+    setNested("professional.jobStatus", clean(professional.jobStatus));
+    setNested("professional.workExperience", clean(professional.workExperience));
+    setNested("professional.workplaceAddress", clean(professional.workplaceAddress));
 
-    // 🔹 Profile Photo
+    // Business Info
+    setNested("business.hasBusiness", business.hasBusiness);
+    setNested("business.numberOfBusinesses", cleanNumber(business.numberOfBusinesses));
+    setNested("business.name", clean(business.name));
+    setNested("business.about", clean(business.about));
+    setNested("business.registrationNumber", clean(business.registrationNumber));
+    setNested("business.contactNumber", clean(business.contactNumber));
+    setNested("business.email", clean(business.email));
+    setNested("business.website", clean(business.website));
+    setNested("business.startedYear", clean(business.startedYear));
+    setNested("business.address", clean(business.address));
+    setNested("business.numberOfBranches", cleanNumber(business.numberOfBranches));
+    setNested("business.portalName", clean(business.portalName));
+    setNested("business.grade", cleanNumber(business.grade));
+
     if (req.file) {
       setNested("photo", `/uploads/${req.file.filename}`);
     }
 
-    // 🔹 Update the document
     const updatedMember = await Member.findByIdAndUpdate(
       req.params.id,
       { $set: updateFields },
@@ -274,8 +286,10 @@ export const updateMember = async (req, res) => {
       return res.status(404).json({ message: "Member not found" });
     }
 
-    res.json({ message: "Member updated successfully", updatedMember });
-
+    res.json({
+      message: "Member updated successfully",
+      updatedMember,
+    });
   } catch (err) {
     console.error(err);
     res.status(400).json({ error: err.message });

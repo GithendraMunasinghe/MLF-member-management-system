@@ -16,53 +16,47 @@ export default function EditMemberModal({
   onClose,
   onUpdated,
 }: EditMemberModalProps) {
-
-  const { toast } = useToast(); // ✅ moved inside component
+  const { toast } = useToast();
 
   const [name, setName] = useState("");
-  const [regNo, setRegNo] = useState<number>(0);
+  const [regNo, setRegNo] = useState<string>("");
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
-  //useEffect(() => {
-  //  setName(member.name);
-  //  setRegNo(member.regNo);
-  //  setDescription(member.description);
-  //  setImagePreview(member.photo || null);
-  //}, [member]);
-
   useEffect(() => {
-
-  setName(member.name);
-  setRegNo(member.regNo);
-
-  setImagePreview(member.photo ? `${API_URL}${member.photo}` : null);
-  setImageFile(null);
-}, [member]);
+    setName(member.personalInfo?.fullName || "");
+    setRegNo(member.regNo || "");
+    setImagePreview(member.photo ? `${API_URL}${member.photo}` : null);
+    setImageFile(null);
+  }, [member]);
 
   const handleSubmit = async () => {
     try {
       const token = localStorage.getItem("token");
 
       const formData = new FormData();
-      formData.append("name", name);
-      formData.append("regNo", regNo.toString());
+
+      formData.append("regNo", regNo);
+
+      formData.append(
+        "personalInfo",
+        JSON.stringify({
+          ...member.personalInfo,
+          fullName: name,
+        })
+      );
 
       if (imageFile) {
         formData.append("photo", imageFile);
       }
 
-      await axios.put(
-        `${API_URL}/api/members/${member._id}`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      await axios.put(`${API_URL}/api/members/${member._id}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       toast({
         title: "Saved",
@@ -72,7 +66,6 @@ export default function EditMemberModal({
 
       onUpdated();
       onClose();
-
     } catch (err) {
       console.error(err);
 
@@ -96,7 +89,6 @@ export default function EditMemberModal({
 
         <h2 className="text-xl font-semibold mb-4">Edit Member</h2>
 
-        {/* Image Upload */}
         <div className="mb-4">
           {imagePreview ? (
             <div className="relative w-24 h-24">
@@ -134,7 +126,6 @@ export default function EditMemberModal({
           )}
         </div>
 
-        {/* Name */}
         <div className="mb-3">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Name
@@ -147,15 +138,14 @@ export default function EditMemberModal({
           />
         </div>
 
-        {/* Registration Number */}
         <div className="mb-3">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Registration Number
           </label>
           <input
-            type="number"
+            type="text"
             value={regNo}
-            onChange={(e) => setRegNo(Number(e.target.value))}
+            onChange={(e) => setRegNo(e.target.value)}
             className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
           />
         </div>

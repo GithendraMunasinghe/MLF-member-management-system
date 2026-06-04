@@ -133,7 +133,7 @@ export default function DraftsPage() {
                       size="sm"
                       className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
                       onClick={() =>
-                        navigate(`/admin-dashboard/members/drafts/${draft._id}`)
+                        navigate(`/admin-dashboard/add-member/${draft._id}`)
                       }
                     >
                       <Pencil size={14} />
