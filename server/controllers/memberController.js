@@ -128,10 +128,10 @@ export const createMember = async (req, res) => {
   }
 };
 
-// 2. Get all members
+// 2. Get all completed members only
 export const getMembers = async (req, res) => {
   try {
-    const members = await Member.find()
+    const members = await Member.find({ status: "completed" })
       .populate("organizationId")
       .populate("eventId")
       .populate("coordinatorId")
@@ -326,16 +326,17 @@ export const searchMembers = async (req, res) => {
   try {
     let query = req.query.q;
 
-    // ✅ Trim input
+    // Trim input
     query = query?.trim();
 
-    // ✅ If empty → return all
-    if (!query) {
-      const members = await Member.find().sort({ createdAt: -1 });
-      return res.json(members);
-    }
+    // If empty → return all
+  if (!query) {
+    const members = await Member.find({ status: "completed" }).sort({ createdAt: -1 });
+    return res.json(members);
+  }
 
     const members = await Member.find({
+      status: "completed",
       $or: [
             { "personalInfo.fullName": { $regex: query, $options: "i" } },
             { regNo: { $regex: query, $options: "i" } },
