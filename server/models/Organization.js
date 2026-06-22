@@ -6,7 +6,18 @@ const organizationSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      enum: ["Foundation", "IBDF"], // fixed predefined orgs
+    },
+
+    purposeType: {
+      type: String,
+      enum: ["social_welfare", "business"],
+      required: true,
+    },
+
+    formType: {
+      type: String,
+      enum: ["type1", "type2"],
+      required: true,
     },
 
     registrationNumber: {
@@ -17,10 +28,8 @@ const organizationSchema = new mongoose.Schema(
     },
 
     logo: {
-      type: String, // /uploads/logo.png
+      type: String,
     },
-
-    // member count will be calculated dynamically from Member collection
   },
   { timestamps: true }
 );

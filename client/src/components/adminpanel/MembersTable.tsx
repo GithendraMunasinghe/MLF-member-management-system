@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash, Plus } from "lucide-react";
+import { Pencil, Trash, Plus, Eye } from "lucide-react";
 import EditMemberModal from "./modals/EditMemberModal";
 import { Member } from "@/types/member";
 import DeleteMemberModal from "./modals/DeleteMemberModal";
@@ -208,13 +208,32 @@ export default function MembersTable() {
             {paginatedMembers.length > 0 ? (
               paginatedMembers.map((member) => (
                 <tr key={member._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-2 border-b">{member.personalInfo?.fullName || "-"}</td>
+                  <td
+                    className="px-6 py-2 border-b"
+                    title={member.personalInfo?.fullName || ""}
+                  >
+                    {member.personalInfo?.fullName
+                      ? member.personalInfo.fullName.length > 25
+                        ? `${member.personalInfo.fullName.substring(0, 25)}...`
+                        : member.personalInfo.fullName
+                      : "-"}
+                  </td>
                   <td className="px-6 py-2 border-b">{member.regNo}</td>
                   <td className="px-6 py-2 border-b">
                     {new Date(member.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-2 border-b">
                     <div className="flex gap-2">
+                      <Button
+                        size="icon"
+                        className="bg-blue-500 hover:bg-blue-600 text-white h-8 w-8"
+                        onClick={() =>
+                          navigate(`/admin-dashboard/members/profile/${member._id}`)
+                        }
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+
                       <Button
                         size="icon"
                         className="bg-green-500 hover:bg-green-600 text-white h-8 w-8"

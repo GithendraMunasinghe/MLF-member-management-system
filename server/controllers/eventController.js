@@ -1,12 +1,28 @@
 import Event from "../models/Event.js";
+import Organization from "../models/Organization.js";
 import Member from "../models/Member.js";
+
+const getOrganizationTypeFromPurpose = (purposeType) => {
+  if (purposeType === "business") return "IBDF";
+  if (purposeType === "social_welfare") return "Foundation";
+  return undefined;
+};
 
 // 1. Create Event
 export const createEvent = async (req, res) => {
   try {
-    const { name, organizationType, organizationId, date, description } = req.body;
+    const { name, organizationId, date, description } = req.body;
 
-    // Handle file upload
+    const organization = await Organization.findById(organizationId);
+
+    if (!organization) {
+      return res.status(404).json({ message: "Organization not found" });
+    }
+
+    const organizationType = getOrganizationTypeFromPurpose(
+      organization.purposeType
+    );
+
     const logo = req.file ? `/uploads/${req.file.filename}` : null;
 
     const event = new Event({
@@ -24,34 +40,46 @@ export const createEvent = async (req, res) => {
       message: "Event created successfully",
       event,
     });
-
   } catch (err) {
     console.error(err);
     res.status(400).json({ error: err.message });
   }
 };
 
-// 2. Get All Events (with optional filter)
+// 2. Get All Events with member count
 export const getEvents = async (req, res) => {
   try {
     const { organizationType, organizationId } = req.query;
 
-    let filter = {};
+    const filter = {};
 
-    // Filter by organization type (Foundation / IBDF)
     if (organizationType) {
       filter.organizationType = organizationType;
     }
 
-    // NEW: Filter by organizationId (IMPORTANT)
     if (organizationId) {
       filter.organizationId = organizationId;
     }
 
-    const events = await Event.find(filter).sort({ createdAt: -1 });
+    const events = await Event.find(filter)
+      .populate("organizationId")
+      .sort({ date: -1, createdAt: -1 });
 
-    res.json(events);
+    const result = await Promise.all(
+      events.map(async (event) => {
+        const count = await Member.countDocuments({
+          eventId: event._id,
+          status: "completed",
+        });
 
+        return {
+          ...event._doc,
+          memberCount: count,
+        };
+      })
+    );
+
+    res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -60,14 +88,23 @@ export const getEvents = async (req, res) => {
 // 3. Get Single Event
 export const getEventById = async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id);
+    const event = await Event.findById(req.params.id).populate(
+      "organizationId"
+    );
 
     if (!event) {
       return res.status(404).json({ message: "Event not found" });
     }
 
-    res.json(event);
+    const count = await Member.countDocuments({
+      eventId: event._id,
+      status: "completed",
+    });
 
+    res.json({
+      ...event._doc,
+      memberCount: count,
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -79,13 +116,31 @@ export const updateEvent = async (req, res) => {
     const data = req.body;
     const updateFields = {};
 
-    // Only update provided fields
-    if (data.name) updateFields.name = data.name;
-    if (data.organizationType) updateFields.organizationType = data.organizationType;
-    if (data.date) updateFields.date = data.date;
-    if (data.description) updateFields.description = data.description;
+    if (data.name !== undefined) {
+      updateFields.name = data.name;
+    }
 
-    // Handle logo upload
+    if (data.date !== undefined) {
+      updateFields.date = data.date;
+    }
+
+    if (data.description !== undefined) {
+      updateFields.description = data.description;
+    }
+
+    if (data.organizationId !== undefined) {
+      const organization = await Organization.findById(data.organizationId);
+
+      if (!organization) {
+        return res.status(404).json({ message: "Organization not found" });
+      }
+
+      updateFields.organizationId = data.organizationId;
+      updateFields.organizationType = getOrganizationTypeFromPurpose(
+        organization.purposeType
+      );
+    }
+
     if (req.file) {
       updateFields.logo = `/uploads/${req.file.filename}`;
     }
@@ -104,7 +159,6 @@ export const updateEvent = async (req, res) => {
       message: "Event updated successfully",
       updatedEvent,
     });
-
   } catch (err) {
     console.error(err);
     res.status(400).json({ error: err.message });
@@ -114,6 +168,16 @@ export const updateEvent = async (req, res) => {
 // 5. Delete Event
 export const deleteEvent = async (req, res) => {
   try {
+    const usedMembers = await Member.countDocuments({
+      eventId: req.params.id,
+    });
+
+    if (usedMembers > 0) {
+      return res.status(400).json({
+        message: "Cannot delete event because members are assigned to this event.",
+      });
+    }
+
     const deletedEvent = await Event.findByIdAndDelete(req.params.id);
 
     if (!deletedEvent) {
@@ -121,24 +185,23 @@ export const deleteEvent = async (req, res) => {
     }
 
     res.json({ message: "Event deleted successfully" });
-
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// 6. Event Stats (optional)
+// 6. Event Stats
 export const getEventStats = async (req, res) => {
   try {
     const count = await Member.countDocuments({
       eventId: req.params.id,
+      status: "completed",
     });
 
     res.json({
       eventId: req.params.id,
       memberCount: count,
     });
-
   } catch (err) {
     res.status(500).json({ message: "Failed to get stats" });
   }

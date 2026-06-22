@@ -12,9 +12,12 @@ import AddMemberPage from "@/pages/adminpanel/members/AddMemberPage";
 import AdminLayout from "./components/adminpanel/AdminLayout";
 import MembersPage from "./pages/adminpanel/members/MembersPage";
 import DraftsPage from "./pages/adminpanel/members/DraftsPage";
-
+import CoordinatorsPage from "@/pages/adminpanel/coordinators/CoordinatorsPage";
+import EventsPage from "@/pages/adminpanel/events/EventsPage";
+import MemberProfilePage from "@/pages/adminpanel/members/MemberProfilePage";
 
 import ProtectedRoute from "@/components/adminpanel/ProtectedRoute";
+import OrganizationsPage from "./pages/adminpanel/organizations/OrganizationsPage";
 
 const queryClient = new QueryClient();
 
@@ -38,7 +41,7 @@ const App = () => (
           {/* Admin Login */}
           <Route path="/admin-login" element={<AdminLogin />} />
 
-          {/* ✅ Admin Panel (FIXED STRUCTURE) */}
+          {/* Admin Panel (FIXED STRUCTURE) */}
           <Route
             path="/admin-dashboard"
             element={
@@ -52,6 +55,22 @@ const App = () => (
             <Route path="add-member" element={<AddMemberPage />} />
             <Route path="add-member/:id" element={<AddMemberPage />} />
             <Route path="drafts" element={<DraftsPage />} />
+            <Route
+              path="/admin-dashboard/organizations"
+              element={<OrganizationsPage />}
+            />
+            <Route
+              path="/admin-dashboard/coordinators"
+              element={<CoordinatorsPage />}
+            />
+            <Route
+              path="/admin-dashboard/events"
+              element={<EventsPage />}
+            />
+            <Route
+              path="/admin-dashboard/members/profile/:id"
+              element={<MemberProfilePage />}
+            />
             
             {/* <Route path="events" element={<Events />} /> */}
             <Route path="organization" element={<div>Organization</div>} />

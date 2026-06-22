@@ -43,9 +43,9 @@ export default function Sidebar() {
       path: "/admin-dashboard/events",
     },
     {
-      name: "Organization",
+      name: "Organizations",
       icon: Building2,
-      path: "/admin-dashboard/organization",
+      path: "/admin-dashboard/organizations",
     },
     {
       name: "Coordinators",
@@ -58,7 +58,7 @@ export default function Sidebar() {
     <div
       className={`${
         collapsed ? "w-20" : "w-64"
-      } bg-[#0B0F2F] text-white min-h-screen flex flex-col shadow-xl transition-all duration-300`}
+      } bg-[#1c1c1c] text-white min-h-screen flex flex-col shadow-xl transition-all duration-300`}
     >
       {/* Logo Section */}
       <div className="flex items-center justify-between p-4 border-b border-white/10">

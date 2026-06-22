@@ -22,9 +22,12 @@ export default function BasicInfoStep({
 }: Props) {
   return (
     <>
-      <h2 className="text-lg font-semibold mb-4">Basic Information</h2>
+      <h2 className="text-lg font-semibold mb-4">
+        Basic Information
+      </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
         <SelectInput
           label="Organization *"
           options={organizations.map((org) => ({
@@ -32,14 +35,26 @@ export default function BasicInfoStep({
             value: org._id,
           }))}
           onChange={(value: string) => {
-            const selectedOrg = organizations.find((org) => org._id === value);
+            const selectedOrg = organizations.find(
+              (org) => org._id === value
+            );
 
             updateField("organizationId", value);
-            updateField("organizationType", selectedOrg?.name || "");
+
+            // Keep this for backward compatibility
+            updateField(
+              "organizationType",
+              selectedOrg?.purposeType === "business"
+                ? "IBDF"
+                : "Foundation"
+            );
+
+            // Reset event when organization changes
             updateField("eventId", "");
 
+            // NEW LOGIC: Use organization's formType
             const selectedFormType =
-              selectedOrg?.name === "IBDF" ? "type2" : "type1";
+              selectedOrg?.formType || "type1";
 
             setFormType(selectedFormType);
             updateField("formType", selectedFormType);

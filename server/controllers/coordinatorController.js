@@ -21,14 +21,13 @@ export const createCoordinator = async (req, res) => {
       message: "Coordinator created successfully",
       coordinator,
     });
-
   } catch (err) {
     console.error(err);
     res.status(400).json({ error: err.message });
   }
 };
 
-// 2. Get All Coordinators (WITH customer count)
+// 2. Get All Coordinators WITH customer count
 export const getCoordinators = async (req, res) => {
   try {
     const coordinators = await Coordinator.find().sort({ createdAt: -1 });
@@ -36,7 +35,8 @@ export const getCoordinators = async (req, res) => {
     const result = await Promise.all(
       coordinators.map(async (coord) => {
         const count = await Member.countDocuments({
-          coordinator: coord.coordinatorId,
+          coordinatorId: coord._id,
+          status: "completed",
         });
 
         return {
@@ -47,14 +47,13 @@ export const getCoordinators = async (req, res) => {
     );
 
     res.json(result);
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
   }
 };
- 
-// 3. Get Single Coordinator
+
+// 3. Get Single Coordinator WITH customer count
 export const getCoordinatorById = async (req, res) => {
   try {
     const coordinator = await Coordinator.findById(req.params.id);
@@ -64,36 +63,37 @@ export const getCoordinatorById = async (req, res) => {
     }
 
     const count = await Member.countDocuments({
-      coordinator: coordinator.coordinatorId,
+      coordinatorId: coordinator._id,
+      status: "completed",
     });
 
     res.json({
       ...coordinator._doc,
       customerCount: count,
     });
-
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// 4. Update Coordinator (Partial Update)
+// 4. Update Coordinator
 export const updateCoordinator = async (req, res) => {
   try {
     const data = req.body;
     const updateFields = {};
 
-    const set = (key) => {
-      if (data[key] !== undefined) {
-        updateFields[key] = data[key];
-      }
-    };
+    if (data.name !== undefined) {
+      updateFields.name = data.name;
+    }
 
-    set("name");
-    set("coordinatorId");
-    set("phoneNumber");
+    if (data.coordinatorId !== undefined) {
+      updateFields.coordinatorId = data.coordinatorId;
+    }
 
-    // Photo update
+    if (data.phoneNumber !== undefined) {
+      updateFields.phoneNumber = data.phoneNumber;
+    }
+
     if (req.file) {
       updateFields.photo = `/uploads/${req.file.filename}`;
     }
@@ -112,7 +112,6 @@ export const updateCoordinator = async (req, res) => {
       message: "Coordinator updated successfully",
       updatedCoordinator,
     });
-
   } catch (err) {
     console.error(err);
     res.status(400).json({ error: err.message });
@@ -122,20 +121,31 @@ export const updateCoordinator = async (req, res) => {
 // 5. Delete Coordinator
 export const deleteCoordinator = async (req, res) => {
   try {
-    const deletedCoordinator = await Coordinator.findByIdAndDelete(req.params.id);
+    const usedMembers = await Member.countDocuments({
+      coordinatorId: req.params.id,
+    });
+
+    if (usedMembers > 0) {
+      return res.status(400).json({
+        message: "Cannot delete coordinator because customers are assigned to this coordinator.",
+      });
+    }
+
+    const deletedCoordinator = await Coordinator.findByIdAndDelete(
+      req.params.id
+    );
 
     if (!deletedCoordinator) {
       return res.status(404).json({ message: "Coordinator not found" });
     }
 
     res.json({ message: "Coordinator deleted successfully" });
-
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// 6. Get Coordinator Stats (Member Count)
+// 6. Get Coordinator Stats
 export const getCoordinatorStats = async (req, res) => {
   try {
     const coordinator = await Coordinator.findById(req.params.id);
@@ -145,14 +155,15 @@ export const getCoordinatorStats = async (req, res) => {
     }
 
     const count = await Member.countDocuments({
-      coordinator: coordinator.coordinatorId //
+      coordinatorId: coordinator._id,
+      status: "completed",
     });
 
     res.json({
       coordinatorId: coordinator.coordinatorId,
-      memberCount: count
+      coordinatorName: coordinator.name,
+      customerCount: count,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Failed to get stats" });
