@@ -20,6 +20,22 @@ export default function BasicInfoStep({
   setFormType,
   updateField,
 }: Props) {
+  const selectedEvent = events.find(
+    (event) => event._id === formData.eventId
+  );
+
+  const eventCategories = selectedEvent?.categories || [];
+
+  const toggleCategory = (category: string) => {
+    const currentCategories = formData.categories || [];
+
+    const updatedCategories = currentCategories.includes(category)
+      ? currentCategories.filter((item: string) => item !== category)
+      : [...currentCategories, category];
+
+    updateField("categories", updatedCategories);
+  };
+
   return (
     <>
       <h2 className="text-lg font-semibold mb-4">
@@ -27,7 +43,6 @@ export default function BasicInfoStep({
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
         <SelectInput
           label="Organization *"
           options={organizations.map((org) => ({
@@ -41,7 +56,6 @@ export default function BasicInfoStep({
 
             updateField("organizationId", value);
 
-            // Keep this for backward compatibility
             updateField(
               "organizationType",
               selectedOrg?.purposeType === "business"
@@ -49,12 +63,11 @@ export default function BasicInfoStep({
                 : "Foundation"
             );
 
-            // Reset event when organization changes
+            // Reset event and categories when organization changes
             updateField("eventId", "");
+            updateField("categories", []);
 
-            // NEW LOGIC: Use organization's formType
-            const selectedFormType =
-              selectedOrg?.formType || "type1";
+            const selectedFormType = selectedOrg?.formType || "type1";
 
             setFormType(selectedFormType);
             updateField("formType", selectedFormType);
@@ -67,9 +80,42 @@ export default function BasicInfoStep({
             label: e.name,
             value: e._id,
           }))}
-          onChange={(val) => updateField("eventId", val)}
+          onChange={(val) => {
+            updateField("eventId", val);
+            updateField("categories", []);
+          }}
           disabled={!formData.organizationId}
         />
+
+        {formData.eventId && (
+          <div className="md:col-span-2 border border-gray-200 rounded-xl p-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">
+              Categories *
+            </h3>
+
+            {eventCategories.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                {eventCategories.map((category: string) => (
+                  <label
+                    key={category}
+                    className="flex items-center gap-2 text-sm text-gray-700 bg-gray-50 border rounded-lg px-3 py-2 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={(formData.categories || []).includes(category)}
+                      onChange={() => toggleCategory(category)}
+                    />
+                    {category}
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 italic">
+                No categories found for this event.
+              </p>
+            )}
+          </div>
+        )}
 
         <SelectInput
           label="Coordinator *"

@@ -8,6 +8,8 @@ export const buildMemberPayload = (
     formType,
 
     eventId: formData.eventId,
+    categories: formData.categories || [],
+
     coordinatorId: formData.coordinatorId,
 
     regNo: formData.regNo,

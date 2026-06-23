@@ -225,7 +225,14 @@ const handleDeleteEvent = async () => {
                     {event.organizationId?.name || "No Organization"}
                   </span>
 
-                  <p className="text-sm text-gray-800 mt-3">
+                  <p className="text-sm text-gray-600 mt-3">
+                    Event Date :{" "}
+                    <span className="font-medium text-gray-800">
+                      {event.date ? new Date(event.date).toLocaleDateString() : "-"}
+                    </span>
+                  </p>
+
+                  <p className="text-sm text-gray-800 mt-2">
                     No. of members : {event.memberCount || 0}
                   </p>
 

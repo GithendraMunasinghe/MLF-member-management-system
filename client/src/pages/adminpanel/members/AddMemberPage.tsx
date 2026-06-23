@@ -28,6 +28,9 @@ export default function AddMemberPage() {
     formType: "type1",
 
     eventId: "",
+
+    categories: [],
+
     coordinatorId: "",
 
     regNo: "",

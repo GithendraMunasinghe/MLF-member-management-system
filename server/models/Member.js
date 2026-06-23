@@ -27,6 +27,14 @@ const memberSchema = new mongoose.Schema(
       ref: "Event",
     },
 
+    // Categories selected for the event
+    categories: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+
     // Registration
     regNo: {
       type: String,

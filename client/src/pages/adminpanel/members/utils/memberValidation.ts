@@ -5,6 +5,11 @@ export const validateMemberStep = (
   if (step === 1) {
     if (!formData.organizationId) return "Please select an organization.";
     if (!formData.eventId) return "Please select an event.";
+
+    if (!formData.categories || formData.categories.length === 0) {
+      return "Please select at least one category.";
+    }
+
     if (!formData.coordinatorId) return "Please select a coordinator.";
     if (!formData.regNo.trim()) return "Please enter registration number.";
   }

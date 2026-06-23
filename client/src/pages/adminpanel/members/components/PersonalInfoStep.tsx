@@ -60,7 +60,7 @@ export default function PersonalInfoStep({ updateNestedField }: Props) {
 
         <SelectInput
           label="Gender *"
-          options={["male", "female", "other"]}
+          options={["MALE", "FEMALE", "OTHER"]}
           onChange={(val) =>
             updateNestedField("personalInfo", "gender", val)
           }
@@ -68,7 +68,7 @@ export default function PersonalInfoStep({ updateNestedField }: Props) {
 
         <SelectInput
           label="Marital Status"
-          options={["single", "married", "other"]}
+          options={["SINGLE", "MARRIED", "OTHER"]}
           onChange={(val) =>
             updateNestedField("personalInfo", "maritalStatus", val)
           }

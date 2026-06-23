@@ -13,6 +13,14 @@ export const createMember = async (req, res) => {
       }
     };
 
+    const safeParseArray = (value) => {
+      try {
+        return value ? JSON.parse(value) : [];
+      } catch {
+        return [];
+      }
+    };
+
     const clean = (value) => {
       return value === "" ? undefined : value;
     };
@@ -30,6 +38,9 @@ export const createMember = async (req, res) => {
     const business = safeParse(data.business);
     const professional = safeParse(data.professional);
 
+    // Parse categories array
+    const categories = safeParseArray(data.categories);
+
     const photo = req.file ? `/uploads/${req.file.filename}` : null;
 
     const member = new Member({
@@ -42,6 +53,9 @@ export const createMember = async (req, res) => {
       organizationId: clean(data.organizationId),
       eventId: clean(data.eventId),
       coordinatorId: clean(data.coordinatorId),
+
+      // Categories selected under selected event
+      categories,
 
       regNo: clean(data.regNo),
       photo,
@@ -58,7 +72,6 @@ export const createMember = async (req, res) => {
         passportNumber: clean(personalInfo.passportNumber),
         drivingLicense: clean(personalInfo.drivingLicense),
 
-        // IMPORTANT: enum fields must not be empty string
         gender: clean(personalInfo.gender),
         maritalStatus: clean(personalInfo.maritalStatus),
 
@@ -121,7 +134,6 @@ export const createMember = async (req, res) => {
       message: "Member created successfully",
       member,
     });
-
   } catch (err) {
     console.error(err);
     res.status(400).json({ error: err.message });
@@ -193,6 +205,14 @@ export const updateMember = async (req, res) => {
       }
     };
 
+    const safeParseArray = (value) => {
+      try {
+        return value ? JSON.parse(value) : [];
+      } catch {
+        return [];
+      }
+    };
+
     const clean = (value) => {
       return value === "" ? undefined : value;
     };
@@ -209,6 +229,8 @@ export const updateMember = async (req, res) => {
     const business = safeParse(data.business);
     const professional = safeParse(data.professional);
 
+    const categories = safeParseArray(data.categories);
+
     const setNested = (objPath, value) => {
       if (value !== undefined) {
         updateFields[objPath] = value;
@@ -223,6 +245,11 @@ export const updateMember = async (req, res) => {
     setNested("organizationId", clean(data.organizationId));
     setNested("eventId", clean(data.eventId));
     setNested("coordinatorId", clean(data.coordinatorId));
+
+    // Categories selected under selected event
+    if (data.categories !== undefined) {
+      setNested("categories", categories);
+    }
 
     setNested("regNo", clean(data.regNo));
     setNested("batchNumber", clean(data.batchNumber));

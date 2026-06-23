@@ -8,14 +8,12 @@ const eventSchema = new mongoose.Schema(
       trim: true,
     },
 
-    //Link to Organization (IMPORTANT)
     organizationType: {
       type: String,
       enum: ["Foundation", "IBDF"],
       required: true,
     },
 
-    // Optional (future upgrade → use organizationId instead)
     organizationId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Organization",
@@ -31,9 +29,16 @@ const eventSchema = new mongoose.Schema(
     },
 
     logo: {
-      type: String, // /uploads/logo.png
+      type: String,
     },
 
+    // NEW
+    categories: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
   },
   { timestamps: true }
 );

@@ -3,6 +3,7 @@ import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { API_URL } from "@/config/api";
 import { useToast } from "@/components/ui/use-toast";
+import { Plus, X } from "lucide-react";
 
 interface Organization {
   _id: string;
@@ -17,6 +18,7 @@ interface EventItem {
   logo?: string;
   organizationId?: Organization;
   memberCount: number;
+  categories?: string[];
 }
 
 interface Props {
@@ -24,6 +26,8 @@ interface Props {
   onClose: () => void;
   onUpdated: () => void;
 }
+
+const STATIC_CATEGORIES = ["Doctorate", "Professorship", "Deshamanya"];
 
 export default function EditEventModal({
   event,
@@ -41,6 +45,9 @@ export default function EditEventModal({
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+
+  const [selectedStaticCategories, setSelectedStaticCategories] = useState<string[]>([]);
+  const [customCategories, setCustomCategories] = useState<string[]>([""]);
 
   const fetchOrganizations = async () => {
     try {
@@ -62,13 +69,69 @@ export default function EditEventModal({
     setDescription(event.description || "");
     setLogoPreview(event.logo ? `${API_URL}${event.logo}` : null);
     setLogoFile(null);
+
+    const existingCategories = event.categories || [];
+
+    const staticSelected = existingCategories.filter((category) =>
+      STATIC_CATEGORIES.includes(category)
+    );
+
+    const customSelected = existingCategories.filter(
+      (category) => !STATIC_CATEGORIES.includes(category)
+    );
+
+    setSelectedStaticCategories(staticSelected);
+    setCustomCategories(customSelected.length > 0 ? customSelected : [""]);
   }, [event]);
+
+  const toggleStaticCategory = (category: string) => {
+    setSelectedStaticCategories((prev) =>
+      prev.includes(category)
+        ? prev.filter((item) => item !== category)
+        : [...prev, category]
+    );
+  };
+
+  const updateCustomCategory = (index: number, value: string) => {
+    setCustomCategories((prev) =>
+      prev.map((item, i) => (i === index ? value : item))
+    );
+  };
+
+  const addCustomCategoryInput = () => {
+    setCustomCategories((prev) => [...prev, ""]);
+  };
+
+  const removeCustomCategoryInput = (index: number) => {
+    setCustomCategories((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const buildFinalCategories = () => {
+    const cleanedCustomCategories = customCategories
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    return Array.from(
+      new Set([...selectedStaticCategories, ...cleanedCustomCategories])
+    );
+  };
 
   const handleSubmit = async () => {
     if (!organizationId) {
       toast({
         title: "Missing organization",
         description: "Please select an organization for this event.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const finalCategories = buildFinalCategories();
+
+    if (finalCategories.length === 0) {
+      toast({
+        title: "Missing categories",
+        description: "Please select or add at least one category.",
         variant: "destructive",
       });
       return;
@@ -82,6 +145,7 @@ export default function EditEventModal({
       formData.append("organizationId", organizationId);
       formData.append("date", date);
       formData.append("description", description);
+      formData.append("categories", JSON.stringify(finalCategories));
 
       if (logoFile) {
         formData.append("logo", logoFile);
@@ -117,7 +181,7 @@ export default function EditEventModal({
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl p-6 w-[440px] shadow-xl relative">
+      <div className="bg-white rounded-2xl p-6 w-[500px] max-h-[90vh] overflow-y-auto shadow-xl relative">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
@@ -164,6 +228,74 @@ export default function EditEventModal({
             onChange={(e) => setDescription(e.target.value)}
             className="w-full px-3 py-2 border rounded-lg min-h-[90px]"
           />
+
+          <div className="border border-gray-200 rounded-xl p-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">
+              Static Categories
+            </h3>
+
+            <div className="flex flex-col gap-2">
+              {STATIC_CATEGORIES.map((category) => (
+                <label
+                  key={category}
+                  className="flex items-center gap-2 text-sm text-gray-700"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedStaticCategories.includes(category)}
+                    onChange={() => toggleStaticCategory(category)}
+                  />
+                  {category}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="border border-gray-200 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-gray-700">
+                Custom Categories
+              </h3>
+
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="flex items-center gap-1"
+                onClick={addCustomCategoryInput}
+              >
+                <Plus size={14} />
+                Add
+              </Button>
+            </div>
+
+            <div className="space-y-2">
+              {customCategories.map((category, index) => (
+                <div key={index} className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Enter custom category"
+                    value={category}
+                    onChange={(e) =>
+                      updateCustomCategory(index, e.target.value)
+                    }
+                    className="w-full px-3 py-2 border rounded-lg"
+                  />
+
+                  {customCategories.length > 1 && (
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="outline"
+                      onClick={() => removeCustomCategoryInput(index)}
+                    >
+                      <X size={14} />
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
 
           {logoPreview && (
             <img

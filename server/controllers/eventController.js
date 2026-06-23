@@ -13,6 +13,16 @@ export const createEvent = async (req, res) => {
   try {
     const { name, organizationId, date, description } = req.body;
 
+    const parseCategories = (value) => {
+      try {
+        return value ? JSON.parse(value) : [];
+      } catch {
+        return [];
+      }
+    };
+
+    const categories = parseCategories(req.body.categories);
+
     const organization = await Organization.findById(organizationId);
 
     if (!organization) {
@@ -32,6 +42,7 @@ export const createEvent = async (req, res) => {
       date,
       description,
       logo,
+      categories,
     });
 
     await event.save();
@@ -116,6 +127,14 @@ export const updateEvent = async (req, res) => {
     const data = req.body;
     const updateFields = {};
 
+    const parseCategories = (value) => {
+      try {
+        return value ? JSON.parse(value) : [];
+      } catch {
+        return [];
+      }
+    };
+
     if (data.name !== undefined) {
       updateFields.name = data.name;
     }
@@ -139,6 +158,10 @@ export const updateEvent = async (req, res) => {
       updateFields.organizationType = getOrganizationTypeFromPurpose(
         organization.purposeType
       );
+    }
+
+    if (data.categories !== undefined) {
+      updateFields.categories = parseCategories(data.categories);
     }
 
     if (req.file) {
