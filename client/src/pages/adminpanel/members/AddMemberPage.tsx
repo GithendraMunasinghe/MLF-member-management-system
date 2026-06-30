@@ -253,7 +253,10 @@ useEffect(() => {
 
         {/* STEP 2 — PERSONAL */}
         {step === 2 && (
-          <PersonalInfoStep updateNestedField={updateNestedField} />
+          <PersonalInfoStep
+            formData={formData}
+            updateNestedField={updateNestedField}
+          />
         )}
 
         {/* STEP 3 — CONTACT */}

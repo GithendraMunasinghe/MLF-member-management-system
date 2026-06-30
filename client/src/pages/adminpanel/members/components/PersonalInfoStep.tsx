@@ -3,10 +3,14 @@ import SelectInput from "@/components/adminpanel/inputs/SelectInput";
 import DatePickerInput from "@/components/adminpanel/inputs/DatePickerInput";
 
 interface Props {
+  formData: any;
   updateNestedField: (section: string, field: string, value: any) => void;
 }
 
-export default function PersonalInfoStep({ updateNestedField }: Props) {
+export default function PersonalInfoStep({
+  formData,
+  updateNestedField,
+}: Props) {
   return (
     <>
       <h2 className="text-lg font-semibold mb-4">Personal Information</h2>
@@ -76,6 +80,7 @@ export default function PersonalInfoStep({ updateNestedField }: Props) {
 
         <DatePickerInput
           label="Date of Birth"
+          value={formData.personalInfo.dateOfBirth || ""}
           onChange={(val) =>
             updateNestedField("personalInfo", "dateOfBirth", val)
           }

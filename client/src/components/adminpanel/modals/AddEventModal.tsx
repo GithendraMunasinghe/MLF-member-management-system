@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { API_URL } from "@/config/api";
 import { useToast } from "@/components/ui/use-toast";
 import { Plus, X } from "lucide-react";
+import DatePickerInput from "@/components/adminpanel/inputs/DatePickerInput";
 
 interface Organization {
   _id: string;
@@ -76,11 +77,34 @@ export default function AddEventModal({ onClose, onCreated }: Props) {
     );
   };
 
+  const convertToISODate = (dateString: string) => {
+    if (!dateString) return "";
+
+    const [day, month, year] = dateString.split("/");
+
+    if (!day || !month || !year || year.length !== 4) {
+      return "";
+    }
+
+    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  };
+
   const handleSubmit = async () => {
     if (!organizationId) {
       toast({
         title: "Missing organization",
         description: "Please select an organization for this event.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const isoDate = convertToISODate(date);
+
+    if (!isoDate) {
+      toast({
+        title: "Invalid date",
+        description: "Please enter event date as DD/MM/YYYY.",
         variant: "destructive",
       });
       return;
@@ -103,7 +127,7 @@ export default function AddEventModal({ onClose, onCreated }: Props) {
       const formData = new FormData();
       formData.append("name", name);
       formData.append("organizationId", organizationId);
-      formData.append("date", date);
+      formData.append("date", isoDate);
       formData.append("description", description);
       formData.append("categories", JSON.stringify(finalCategories));
 
@@ -175,11 +199,10 @@ export default function AddEventModal({ onClose, onCreated }: Props) {
             ))}
           </select>
 
-          <input
-            type="date"
+          <DatePickerInput
+            label="Event Date"
             value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg"
+            onChange={setDate}
           />
 
           <textarea
