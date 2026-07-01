@@ -1,15 +1,16 @@
-import { useState } from "react";
 import { Upload } from "lucide-react";
+
+interface Props {
+  label: string;
+  value?: File | null;
+  onChange?: (file: File) => void;
+}
 
 export default function FileUpload({
   label,
+  value,
   onChange,
-}: {
-  label: string;
-  onChange?: (file: File) => void;
-}) {
-  const [fileName, setFileName] = useState("");
-
+}: Props) {
   return (
     <div className="flex flex-col gap-1">
       <label className="text-sm text-gray-500 font-medium">
@@ -20,7 +21,7 @@ export default function FileUpload({
         <Upload size={18} />
 
         <span className="text-gray-500">
-          {fileName || "Upload File"}
+          {value?.name || "Upload File"}
         </span>
 
         <input
@@ -31,7 +32,6 @@ export default function FileUpload({
             const file = e.target.files?.[0];
 
             if (file) {
-              setFileName(file.name);
               onChange?.(file);
             }
           }}

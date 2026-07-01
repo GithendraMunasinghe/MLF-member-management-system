@@ -8,6 +8,19 @@ export interface Member {
   formType?: string;
   organizationType?: string;
 
+  categories?: string[];
+
+  eventId?: {
+    _id: string;
+    name: string;
+  };
+
+  coordinatorId?: {
+    _id: string;
+    name: string;
+    coordinatorId?: string;
+  };
+
   personalInfo?: {
     fullName?: string;
     certificateName?: string;

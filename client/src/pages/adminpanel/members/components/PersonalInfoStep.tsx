@@ -18,6 +18,7 @@ export default function PersonalInfoStep({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <TextInput
           label="Full Name *"
+          value={formData.personalInfo.fullName}
           onChange={(val) =>
             updateNestedField("personalInfo", "fullName", val)
           }
@@ -25,6 +26,7 @@ export default function PersonalInfoStep({
 
         <TextInput
           label="Certificate Name *"
+          value={formData.personalInfo.certificateName}
           onChange={(val) =>
             updateNestedField("personalInfo", "certificateName", val)
           }
@@ -32,6 +34,7 @@ export default function PersonalInfoStep({
 
         <TextInput
           label="Name with Initials"
+          value={formData.personalInfo.nameWithInitials}
           onChange={(val) =>
             updateNestedField("personalInfo", "nameWithInitials", val)
           }
@@ -43,6 +46,7 @@ export default function PersonalInfoStep({
 
         <TextInput
           label="NIC Number *"
+          value={formData.personalInfo.nicNumber}
           onChange={(val) =>
             updateNestedField("personalInfo", "nicNumber", val)
           }
@@ -50,6 +54,7 @@ export default function PersonalInfoStep({
 
         <TextInput
           label="Passport Number *"
+          value={formData.personalInfo.passportNumber}
           onChange={(val) =>
             updateNestedField("personalInfo", "passportNumber", val)
           }
@@ -57,6 +62,7 @@ export default function PersonalInfoStep({
 
         <TextInput
           label="Driving License *"
+          value={formData.personalInfo.drivingLicense}
           onChange={(val) =>
             updateNestedField("personalInfo", "drivingLicense", val)
           }
@@ -64,6 +70,7 @@ export default function PersonalInfoStep({
 
         <SelectInput
           label="Gender *"
+          value={formData.personalInfo.gender}
           options={["MALE", "FEMALE", "OTHER"]}
           onChange={(val) =>
             updateNestedField("personalInfo", "gender", val)
@@ -72,6 +79,7 @@ export default function PersonalInfoStep({
 
         <SelectInput
           label="Marital Status"
+          value={formData.personalInfo.maritalStatus}
           options={["SINGLE", "MARRIED", "OTHER"]}
           onChange={(val) =>
             updateNestedField("personalInfo", "maritalStatus", val)

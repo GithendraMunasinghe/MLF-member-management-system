@@ -8,6 +8,7 @@ interface Option {
 interface Props {
   label: string;
   options: (string | Option)[];
+  value?: string;
   onChange?: (value: string) => void;
   disabled?: boolean;
 }
@@ -15,6 +16,7 @@ interface Props {
 export default function SelectInput({
   label,
   options,
+  value = "",
   onChange,
   disabled = false,
 }: Props) {
@@ -24,10 +26,9 @@ export default function SelectInput({
         {label}
       </label>
 
-      {/* Wrapper */}
       <div className="relative">
-
         <select
+          value={value}
           className="
             w-full
             p-3
@@ -64,7 +65,6 @@ export default function SelectInput({
           })}
         </select>
 
-        {/* Custom Arrow */}
         <ChevronDown
           size={18}
           className="
@@ -76,7 +76,6 @@ export default function SelectInput({
             pointer-events-none
           "
         />
-
       </div>
     </div>
   );

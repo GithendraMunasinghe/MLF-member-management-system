@@ -29,7 +29,8 @@ export default function AddEventModal({ onClose, onCreated }: Props) {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const [selectedStaticCategories, setSelectedStaticCategories] = useState<string[]>([]);
+  const [selectedStaticCategories, setSelectedStaticCategories] =
+    useState<string[]>([]);
   const [customCategories, setCustomCategories] = useState<string[]>([""]);
 
   const fetchOrganizations = async () => {
@@ -77,18 +78,6 @@ export default function AddEventModal({ onClose, onCreated }: Props) {
     );
   };
 
-  const convertToISODate = (dateString: string) => {
-    if (!dateString) return "";
-
-    const [day, month, year] = dateString.split("/");
-
-    if (!day || !month || !year || year.length !== 4) {
-      return "";
-    }
-
-    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-  };
-
   const handleSubmit = async () => {
     if (!organizationId) {
       toast({
@@ -99,12 +88,10 @@ export default function AddEventModal({ onClose, onCreated }: Props) {
       return;
     }
 
-    const isoDate = convertToISODate(date);
-
-    if (!isoDate) {
+    if (!date || date.length !== 10) {
       toast({
         title: "Invalid date",
-        description: "Please enter event date as DD/MM/YYYY.",
+        description: "Please enter event date as YYYY-MM-DD.",
         variant: "destructive",
       });
       return;
@@ -127,7 +114,7 @@ export default function AddEventModal({ onClose, onCreated }: Props) {
       const formData = new FormData();
       formData.append("name", name);
       formData.append("organizationId", organizationId);
-      formData.append("date", isoDate);
+      formData.append("date", date);
       formData.append("description", description);
       formData.append("categories", JSON.stringify(finalCategories));
 

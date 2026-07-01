@@ -3,6 +3,7 @@ import SelectInput from "@/components/adminpanel/inputs/SelectInput";
 import { provinceDistrictMap } from "@/data/locationData";
 
 interface Props {
+  formData: any;
   formType: "type1" | "type2";
   province: string;
   setProvince: (value: string) => void;
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function AddressStep({
+  formData,
   formType,
   province,
   setProvince,
@@ -24,6 +26,7 @@ export default function AddressStep({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <TextInput
           label="Permanent Address *"
+          value={formData.address.permanentAddress}
           onChange={(val) =>
             updateNestedField("address", "permanentAddress", val)
           }
@@ -31,6 +34,7 @@ export default function AddressStep({
 
         <SelectInput
           label="Province *"
+          value={formData.address.province}
           options={Object.keys(provinceDistrictMap)}
           onChange={(value: string) => {
             setProvince(value);
@@ -43,6 +47,7 @@ export default function AddressStep({
 
         <SelectInput
           label="District *"
+          value={formData.address.district}
           options={province ? provinceDistrictMap[province] : []}
           disabled={!province}
           onChange={(value: string) => {
@@ -53,6 +58,7 @@ export default function AddressStep({
 
         <TextInput
           label="Divisional Secretariat *"
+          value={formData.address.divisionalSecretariat}
           onChange={(val) =>
             updateNestedField("address", "divisionalSecretariat", val)
           }
@@ -60,6 +66,7 @@ export default function AddressStep({
 
         <TextInput
           label="Grama Niladhari Division *"
+          value={formData.address.gramaNiladhariDivision}
           onChange={(val) =>
             updateNestedField("address", "gramaNiladhariDivision", val)
           }
@@ -68,6 +75,7 @@ export default function AddressStep({
         {formType === "type2" && (
           <TextInput
             label="Police Division *"
+            value={formData.address.policeDivision}
             onChange={(val) =>
               updateNestedField("address", "policeDivision", val)
             }

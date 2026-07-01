@@ -1,6 +1,7 @@
 import TextInput from "@/components/adminpanel/inputs/TextInput";
 
 interface Props {
+  formData: any;
   updateNestedField: (
     section: string,
     field: string,
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export default function ProfessionalInfoStep({
+  formData,
   updateNestedField,
 }: Props) {
   return (
@@ -21,6 +23,7 @@ export default function ProfessionalInfoStep({
 
         <TextInput
           label="Job Status"
+          value={formData.professional.jobStatus}
           onChange={(v) =>
             updateNestedField("professional", "jobStatus", v)
           }
@@ -28,6 +31,7 @@ export default function ProfessionalInfoStep({
 
         <TextInput
           label="Work Experience"
+          value={formData.professional.workExperience}
           onChange={(v) =>
             updateNestedField("professional", "workExperience", v)
           }
@@ -35,6 +39,7 @@ export default function ProfessionalInfoStep({
 
         <TextInput
           label="Workplace Address"
+          value={formData.professional.workplaceAddress}
           onChange={(v) =>
             updateNestedField("professional", "workplaceAddress", v)
           }

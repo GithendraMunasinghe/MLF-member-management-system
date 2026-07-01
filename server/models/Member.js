@@ -66,12 +66,12 @@ const memberSchema = new mongoose.Schema(
 
       gender: {
         type: String,
-        enum: ["male", "female", "other"],
+        enum: ["MALE", "FEMALE", "OTHER"],
       },
 
       maritalStatus: {
         type: String,
-        enum: ["single", "married", "other"],
+        enum: ["SINGLE", "MARRIED", "OTHER"],
       },
 
       dateOfBirth: Date,

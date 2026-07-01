@@ -194,6 +194,9 @@ export default function MembersTable() {
             <tr className="bg-[#F2F2F2]">
               <th className="px-6 py-2 border-b font-medium">Name</th>
               <th className="px-6 py-2 border-b font-medium">Reg No</th>
+              <th className="px-6 py-2 border-b font-medium">Coordinator</th>
+              <th className="px-6 py-2 border-b font-medium">Event</th>
+              <th className="px-6 py-2 border-b font-medium">Categories</th>
               <th
                 className="px-6 py-2 border-b cursor-pointer font-medium"
                 onClick={handleSort}
@@ -219,6 +222,32 @@ export default function MembersTable() {
                       : "-"}
                   </td>
                   <td className="px-6 py-2 border-b">{member.regNo}</td>
+                  
+                  <td className="px-6 py-2 border-b">
+                    {member.coordinatorId?.name || "-"}
+                  </td>
+
+                  <td className="px-6 py-2 border-b">
+                    {member.eventId?.name || "-"}
+                  </td>
+
+                  <td className="px-6 py-2 border-b">
+                    {member.categories && member.categories.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {member.categories.map((category: string) => (
+                          <span
+                            key={category}
+                            className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-700"
+                          >
+                            {category}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      "-"
+                    )}
+                  </td>
+
                   <td className="px-6 py-2 border-b">
                     {new Date(member.createdAt).toLocaleDateString()}
                   </td>
@@ -262,7 +291,7 @@ export default function MembersTable() {
             ) : (
               <tr>
                 <td
-                  colSpan={4}
+                  colSpan={7}
                   className="px-6 py-4 text-center text-gray-500 italic"
                 >
                   No members found. Add some members to see them here.

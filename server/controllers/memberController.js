@@ -144,9 +144,9 @@ export const createMember = async (req, res) => {
 export const getMembers = async (req, res) => {
   try {
     const members = await Member.find({ status: "completed" })
-      .populate("organizationId")
-      .populate("eventId")
-      .populate("coordinatorId")
+      .populate("organizationId", "name")
+      .populate("eventId", "name")
+      .populate("coordinatorId", "name coordinatorId")
       .sort({ createdAt: -1 });
 
     res.json(members);

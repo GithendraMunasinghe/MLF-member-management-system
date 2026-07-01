@@ -20,7 +20,19 @@ export default function BasicInfoStep({
   setFormType,
   updateField,
 }: Props) {
-  const selectedEvent = events.find(
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const upcomingEvents = events.filter((event) => {
+    if (!event.date) return true;
+
+    const eventDate = new Date(event.date);
+    eventDate.setHours(0, 0, 0, 0);
+
+    return eventDate >= today;
+  });
+
+  const selectedEvent = upcomingEvents.find(
     (event) => event._id === formData.eventId
   );
 
@@ -45,6 +57,7 @@ export default function BasicInfoStep({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <SelectInput
           label="Organization *"
+          value={formData.organizationId}
           options={organizations.map((org) => ({
             label: org.name,
             value: org._id,
@@ -63,7 +76,6 @@ export default function BasicInfoStep({
                 : "Foundation"
             );
 
-            // Reset event and categories when organization changes
             updateField("eventId", "");
             updateField("categories", []);
 
@@ -76,7 +88,8 @@ export default function BasicInfoStep({
 
         <SelectInput
           label="Event *"
-          options={events.map((e) => ({
+          value={formData.eventId}
+          options={upcomingEvents.map((e) => ({
             label: e.name,
             value: e._id,
           }))}
@@ -119,6 +132,7 @@ export default function BasicInfoStep({
 
         <SelectInput
           label="Coordinator *"
+          value={formData.coordinatorId}
           options={coordinators.map((c) => ({
             label: c.name,
             value: c._id,
@@ -128,6 +142,7 @@ export default function BasicInfoStep({
 
         <TextInput
           label="Registration Number *"
+          value={formData.regNo}
           onChange={(val) => updateField("regNo", val)}
         />
 
@@ -135,11 +150,13 @@ export default function BasicInfoStep({
           <>
             <TextInput
               label="Batch Number *"
+              value={formData.batchNumber}
               onChange={(val) => updateField("batchNumber", val)}
             />
 
             <TextInput
               label="Registered Year *"
+              value={formData.registeredYear}
               onChange={(val) => updateField("registeredYear", val)}
             />
           </>

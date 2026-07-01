@@ -262,6 +262,7 @@ useEffect(() => {
         {/* STEP 3 — CONTACT */}
         {step === 3 && (
           <ContactInfoStep
+            formData={formData}
             formType={formType}
             updateNestedField={updateNestedField}
           />
@@ -270,6 +271,7 @@ useEffect(() => {
         {/* STEP 4 — ADDRESS */}
         {step === 4 && (
           <AddressStep
+            formData={formData}
             formType={formType}
             province={province}
             setProvince={setProvince}
@@ -283,10 +285,12 @@ useEffect(() => {
           <>
             {formType === "type2" ? (
               <BusinessInfoStep
+                formData={formData}
                 updateNestedField={updateNestedField}
               />
             ) : (
               <ProfessionalInfoStep
+                formData={formData}
                 updateNestedField={updateNestedField}
               />
             )}
@@ -295,7 +299,10 @@ useEffect(() => {
 
       {/* STEP FINAL */}
       {step === totalSteps && (
-        <PhotoStep updateField={updateField} />
+        <PhotoStep
+          photo={formData.photo}
+          updateField={updateField}
+        />
       )}
 
       </div>

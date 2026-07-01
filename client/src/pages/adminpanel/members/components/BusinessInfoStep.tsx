@@ -2,6 +2,7 @@ import TextInput from "@/components/adminpanel/inputs/TextInput";
 import SelectInput from "@/components/adminpanel/inputs/SelectInput";
 
 interface Props {
+  formData: any;
   updateNestedField: (
     section: string,
     field: string,
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function BusinessInfoStep({
+  formData,
   updateNestedField,
 }: Props) {
   return (
@@ -19,9 +21,9 @@ export default function BusinessInfoStep({
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
         <TextInput
           label="Business Name"
+          value={formData.business.name}
           onChange={(v) =>
             updateNestedField("business", "name", v)
           }
@@ -29,6 +31,7 @@ export default function BusinessInfoStep({
 
         <TextInput
           label="About Business"
+          value={formData.business.about}
           onChange={(v) =>
             updateNestedField("business", "about", v)
           }
@@ -36,6 +39,7 @@ export default function BusinessInfoStep({
 
         <TextInput
           label="Registration Number"
+          value={formData.business.registrationNumber}
           onChange={(v) =>
             updateNestedField("business", "registrationNumber", v)
           }
@@ -43,6 +47,7 @@ export default function BusinessInfoStep({
 
         <TextInput
           label="Contact Number"
+          value={formData.business.contactNumber}
           onChange={(v) =>
             updateNestedField("business", "contactNumber", v)
           }
@@ -50,6 +55,7 @@ export default function BusinessInfoStep({
 
         <TextInput
           label="Email"
+          value={formData.business.email}
           onChange={(v) =>
             updateNestedField("business", "email", v)
           }
@@ -57,6 +63,7 @@ export default function BusinessInfoStep({
 
         <TextInput
           label="Website"
+          value={formData.business.website}
           onChange={(v) =>
             updateNestedField("business", "website", v)
           }
@@ -64,6 +71,7 @@ export default function BusinessInfoStep({
 
         <TextInput
           label="Started Year"
+          value={formData.business.startedYear}
           onChange={(v) =>
             updateNestedField("business", "startedYear", v)
           }
@@ -71,6 +79,7 @@ export default function BusinessInfoStep({
 
         <TextInput
           label="Business Address"
+          value={formData.business.address}
           onChange={(v) =>
             updateNestedField("business", "address", v)
           }
@@ -78,6 +87,7 @@ export default function BusinessInfoStep({
 
         <TextInput
           label="Number of Branches"
+          value={formData.business.numberOfBranches}
           onChange={(v) =>
             updateNestedField("business", "numberOfBranches", v)
           }
@@ -85,6 +95,7 @@ export default function BusinessInfoStep({
 
         <TextInput
           label="Portal Name"
+          value={formData.business.portalName}
           onChange={(v) =>
             updateNestedField("business", "portalName", v)
           }
@@ -92,15 +103,15 @@ export default function BusinessInfoStep({
 
         <SelectInput
           label="Grade"
+          value={formData.business.grade}
           options={[
-            "0","1","2","3","4","5",
-            "6","7","8","9","10"
+            "0", "1", "2", "3", "4", "5",
+            "6", "7", "8", "9", "10",
           ]}
           onChange={(v) =>
             updateNestedField("business", "grade", v)
           }
         />
-
       </div>
     </>
   );

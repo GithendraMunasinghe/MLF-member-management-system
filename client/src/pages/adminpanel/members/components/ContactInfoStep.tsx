@@ -1,6 +1,7 @@
 import TextInput from "@/components/adminpanel/inputs/TextInput";
 
 interface Props {
+  formData: any;
   formType: "type1" | "type2";
   updateNestedField: (
     section: string,
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function ContactInfoStep({
+  formData,
   formType,
   updateNestedField,
 }: Props) {
@@ -23,6 +25,7 @@ export default function ContactInfoStep({
 
         <TextInput
           label="Mobile Phone *"
+          value={formData.contact.mobilePhone}
           onChange={(val) =>
             updateNestedField("contact", "mobilePhone", val)
           }
@@ -30,6 +33,7 @@ export default function ContactInfoStep({
 
         <TextInput
           label="WhatsApp Number"
+          value={formData.contact.whatsappNumber}
           onChange={(val) =>
             updateNestedField("contact", "whatsappNumber", val)
           }
@@ -39,6 +43,7 @@ export default function ContactInfoStep({
           <TextInput
             label="Email"
             type="email"
+            value={formData.contact.email}
             onChange={(val) =>
               updateNestedField("contact", "email", val)
             }
