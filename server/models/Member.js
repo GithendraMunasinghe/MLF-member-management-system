@@ -35,6 +35,23 @@ const memberSchema = new mongoose.Schema(
       },
     ],
 
+    // Titles for each selected category
+    categoryTitles: [
+      {
+        category: {
+          type: String,
+          trim: true,
+        },
+
+        titles: [
+          {
+            type: String,
+            trim: true,
+          },
+        ],
+      },
+    ],
+
     // Registration
     regNo: {
       type: String,

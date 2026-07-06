@@ -38,8 +38,9 @@ export const createMember = async (req, res) => {
     const business = safeParse(data.business);
     const professional = safeParse(data.professional);
 
-    // Parse categories array
+    // Parse arrays
     const categories = safeParseArray(data.categories);
+    const categoryTitles = safeParseArray(data.categoryTitles);
 
     const photo = req.file ? `/uploads/${req.file.filename}` : null;
 
@@ -54,8 +55,9 @@ export const createMember = async (req, res) => {
       eventId: clean(data.eventId),
       coordinatorId: clean(data.coordinatorId),
 
-      // Categories selected under selected event
+      // Categories
       categories,
+      categoryTitles,
 
       regNo: clean(data.regNo),
       photo,
@@ -229,7 +231,9 @@ export const updateMember = async (req, res) => {
     const business = safeParse(data.business);
     const professional = safeParse(data.professional);
 
+    // Parse arrays
     const categories = safeParseArray(data.categories);
+    const categoryTitles = safeParseArray(data.categoryTitles);
 
     const setNested = (objPath, value) => {
       if (value !== undefined) {
@@ -249,6 +253,11 @@ export const updateMember = async (req, res) => {
     // Categories selected under selected event
     if (data.categories !== undefined) {
       setNested("categories", categories);
+    }
+
+    // Titles entered for selected categories
+    if (data.categoryTitles !== undefined) {
+      setNested("categoryTitles", categoryTitles);
     }
 
     setNested("regNo", clean(data.regNo));
@@ -353,30 +362,36 @@ export const searchMembers = async (req, res) => {
   try {
     let query = req.query.q;
 
-    // Trim input
     query = query?.trim();
 
-    // If empty → return all
-  if (!query) {
-    const members = await Member.find({ status: "completed" }).sort({ createdAt: -1 });
-    return res.json(members);
-  }
+    if (!query) {
+      const members = await Member.find({ status: "completed" })
+        .populate("organizationId", "name")
+        .populate("eventId", "name")
+        .populate("coordinatorId", "name coordinatorId")
+        .sort({ createdAt: -1 });
+
+      return res.json(members);
+    }
 
     const members = await Member.find({
       status: "completed",
       $or: [
-            { "personalInfo.fullName": { $regex: query, $options: "i" } },
-            { regNo: { $regex: query, $options: "i" } },
-            { "personalInfo.nicNumber": { $regex: query, $options: "i" } },
-            { "contact.mobilePhone": { $regex: query, $options: "i" } }
-      ]
-    }).sort({ createdAt: -1 });
+        { "personalInfo.fullName": { $regex: query, $options: "i" } },
+        { regNo: { $regex: query, $options: "i" } },
+        { "personalInfo.nicNumber": { $regex: query, $options: "i" } },
+        { "contact.mobilePhone": { $regex: query, $options: "i" } },
+      ],
+    })
+      .populate("organizationId", "name")
+      .populate("eventId", "name")
+      .populate("coordinatorId", "name coordinatorId")
+      .sort({ createdAt: -1 });
 
     res.json(members);
-
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Search failed"});
+    res.status(500).json({ message: "Search failed" });
   }
 };
 

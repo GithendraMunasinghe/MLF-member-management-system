@@ -6,6 +6,13 @@ import { API_URL } from "@/config/api";
 import { ArrowLeft, Pencil, Trash, Save, X } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
+import MemberProfileSidebar from "./components/MemberProfilePage/MemberProfileSidebar";
+import PersonalInfoSection from "./components/MemberProfilePage/PersonalInfoSection";
+import ContactInfoSection from "./components/MemberProfilePage/ContactInfoSection";
+import AddressInfoSection from "./components/MemberProfilePage/AddressInfoSection";
+import ProfessionalInfoSection from "./components/MemberProfilePage/ProfessionalInfoSection";
+import BusinessInfoSection from "./components/MemberProfilePage/BusinessInfoSection";
+
 interface MemberProfile {
   _id: string;
   regNo?: string;
@@ -15,9 +22,14 @@ interface MemberProfile {
   batchNumber?: string;
   registeredYear?: string;
   createdAt?: string;
+  categories?: string[];
+  categoryTitles?: {
+    category?: string;
+    titles?: string[];
+  }[];
 
   organizationId?: { _id?: string; name?: string };
-  eventId?: { _id?: string; name?: string };
+  eventId?: { _id?: string; name?: string; categories?: string[] };
   coordinatorId?: { _id?: string; name?: string; coordinatorId?: string };
 
   personalInfo?: {
@@ -68,47 +80,11 @@ interface MemberProfile {
   };
 }
 
-const DetailRow = ({ label, value }: { label: string; value?: any }) => (
-  <div className="border-b border-gray-100 py-3">
-    <p className="text-xs text-gray-400">{label}</p>
-    <p className="text-sm font-medium text-gray-700">{value || "-"}</p>
-  </div>
-);
-
-const EditableRow = ({
-  label,
-  value,
-  onChange,
-  type = "text",
-}: {
-  label: string;
-  value?: any;
-  onChange: (value: string) => void;
-  type?: string;
-}) => (
-  <div className="border-b border-gray-100 py-3">
-    <label className="text-xs text-gray-400">{label}</label>
-    <input
-      type={type}
-      value={value || ""}
-      onChange={(e) => onChange(e.target.value)}
-      className="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-    />
-  </div>
-);
-
-const Section = ({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) => (
-  <div className="bg-white border border-gray-200 rounded-xl p-5 mb-5">
-    <h2 className="text-base font-semibold text-gray-700 mb-3">{title}</h2>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">{children}</div>
-  </div>
-);
+interface Coordinator {
+  _id: string;
+  name: string;
+  coordinatorId?: string;
+}
 
 export default function MemberProfilePage() {
   const { id } = useParams();
@@ -123,6 +99,9 @@ export default function MemberProfilePage() {
   const [deleting, setDeleting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [coordinators, setCoordinators] = useState<Coordinator[]>([]);
+
   const fetchMember = async () => {
     try {
       setLoading(true);
@@ -136,8 +115,18 @@ export default function MemberProfilePage() {
     }
   };
 
+  const fetchCoordinators = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/coordinators`);
+      setCoordinators(res.data);
+    } catch (err) {
+      console.error("Failed to fetch coordinators", err);
+    }
+  };
+
   useEffect(() => {
     fetchMember();
+    fetchCoordinators();
   }, [id]);
 
   const updateNested = (
@@ -152,6 +141,144 @@ export default function MemberProfilePage() {
         [field]: value,
       },
     }));
+  };
+
+  const toggleCategory = (category: string) => {
+    setEditData((prev) => {
+      if (!prev) return prev;
+
+      const currentCategories = prev.categories || [];
+      const currentCategoryTitles = prev.categoryTitles || [];
+
+      const isSelected = currentCategories.includes(category);
+
+      const updatedCategories = isSelected
+        ? currentCategories.filter((item) => item !== category)
+        : [...currentCategories, category];
+
+      const updatedCategoryTitles = isSelected
+        ? currentCategoryTitles.filter((item) => item.category !== category)
+        : [
+            ...currentCategoryTitles,
+            {
+              category,
+              titles: [""],
+            },
+          ];
+
+      return {
+        ...prev,
+        categories: updatedCategories,
+        categoryTitles: updatedCategoryTitles,
+      };
+    });
+  };
+
+  const updateCategoryTitle = (
+    category: string,
+    titleIndex: number,
+    value: string
+  ) => {
+    setEditData((prev) => {
+      if (!prev) return prev;
+
+      const currentCategoryTitles = prev.categoryTitles || [];
+
+      const existing = currentCategoryTitles.find(
+        (item) => item.category === category
+      );
+
+      let updatedCategoryTitles;
+
+      if (existing) {
+        updatedCategoryTitles = currentCategoryTitles.map((item) =>
+          item.category === category
+            ? {
+                ...item,
+                titles:
+                  item.titles?.map((title, index) =>
+                    index === titleIndex ? value : title
+                  ) || [],
+              }
+            : item
+        );
+      } else {
+        updatedCategoryTitles = [
+          ...currentCategoryTitles,
+          {
+            category,
+            titles: [value],
+          },
+        ];
+      }
+
+      return {
+        ...prev,
+        categoryTitles: updatedCategoryTitles,
+      };
+    });
+  };
+
+  const addCategoryTitle = (category: string) => {
+    setEditData((prev) => {
+      if (!prev) return prev;
+
+      const currentCategoryTitles = prev.categoryTitles || [];
+
+      const existing = currentCategoryTitles.find(
+        (item) => item.category === category
+      );
+
+      if (existing && (existing.titles || []).length >= 2) {
+        return prev;
+      }
+
+      const updatedCategoryTitles = existing
+        ? currentCategoryTitles.map((item) =>
+            item.category === category
+              ? {
+                  ...item,
+                  titles: [...(item.titles || []), ""],
+                }
+              : item
+          )
+        : [
+            ...currentCategoryTitles,
+            {
+              category,
+              titles: [""],
+            },
+          ];
+
+      return {
+        ...prev,
+        categoryTitles: updatedCategoryTitles,
+      };
+    });
+  };
+
+  const removeCategoryTitle = (category: string, titleIndex: number) => {
+    setEditData((prev) => {
+      if (!prev) return prev;
+
+      const updatedCategoryTitles = (prev.categoryTitles || [])
+        .map((item) =>
+          item.category === category
+            ? {
+                ...item,
+                titles: (item.titles || []).filter(
+                  (_, index) => index !== titleIndex
+                ),
+              }
+            : item
+        )
+        .filter((item) => (item.titles || []).length > 0);
+
+      return {
+        ...prev,
+        categoryTitles: updatedCategoryTitles,
+      };
+    });
   };
 
   const handleSave = async () => {
@@ -178,21 +305,45 @@ export default function MemberProfilePage() {
         formData.append("coordinatorId", editData.coordinatorId._id);
       }
 
+      formData.append("categories", JSON.stringify(editData.categories || []));
+      formData.append(
+        "categoryTitles",
+        JSON.stringify(editData.categoryTitles || [])
+      );
+
       formData.append("batchNumber", editData.batchNumber || "");
       formData.append("registeredYear", editData.registeredYear || "");
 
-      formData.append("personalInfo", JSON.stringify(editData.personalInfo || {}));
+      formData.append(
+        "personalInfo",
+        JSON.stringify(editData.personalInfo || {})
+      );
       formData.append("contact", JSON.stringify(editData.contact || {}));
       formData.append("address", JSON.stringify(editData.address || {}));
-      formData.append("professional", JSON.stringify(editData.professional || {}));
+      formData.append(
+        "professional",
+        JSON.stringify(editData.professional || {})
+      );
       formData.append("business", JSON.stringify(editData.business || {}));
 
+      if (photoFile) {
+        formData.append("photo", photoFile);
+      }
+
       const token = localStorage.getItem("token");
+
+      if (!token) {
+        toast({
+          title: "Authentication error",
+          description: "Please login again.",
+          variant: "destructive",
+        });
+        return;
+      }
 
       await axios.put(`${API_URL}/api/members/${id}`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
         },
       });
 
@@ -203,6 +354,7 @@ export default function MemberProfilePage() {
       });
 
       setIsEditing(false);
+      setPhotoFile(null);
       fetchMember();
     } catch (err: any) {
       toast({
@@ -258,7 +410,14 @@ export default function MemberProfilePage() {
   };
 
   const current = isEditing ? editData : member;
-  const photoUrl = current?.photo ? `${API_URL}${current.photo}` : null;
+
+  const getTitlesForCategory = (category: string) => {
+    const categoryTitle = current?.categoryTitles?.find(
+      (item) => item.category === category
+    );
+
+    return categoryTitle?.titles?.filter(Boolean) || [];
+  };
 
   if (loading) {
     return (
@@ -296,6 +455,7 @@ export default function MemberProfilePage() {
                 className="flex items-center gap-2"
                 onClick={() => {
                   setEditData(member);
+                  setPhotoFile(null);
                   setIsEditing(false);
                 }}
               >
@@ -336,155 +496,56 @@ export default function MemberProfilePage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
-        <div className="bg-white border border-gray-200 rounded-xl p-6 h-fit lg:sticky lg:top-6 text-center">
-          <div className="w-36 h-36 rounded-full bg-gray-100 border mx-auto overflow-hidden flex items-center justify-center">
-            {photoUrl ? (
-              <img src={photoUrl} alt="Member" className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-4xl font-semibold text-gray-400">
-                {current.personalInfo?.certificateName?.charAt(0) || "M"}
-              </span>
-            )}
-          </div>
-
-          <h1 className="text-xl font-semibold text-gray-800 mt-4">
-            {current.personalInfo?.certificateName ||
-              current.personalInfo?.fullName ||
-              "-"}
-          </h1>
-
-          <p className="text-sm text-gray-500 mt-1">{current.regNo}</p>
-
-          <div className="mt-5 text-left space-y-3">
-            <DetailRow label="Organization" value={current.organizationId?.name} />
-            <DetailRow label="Event" value={current.eventId?.name} />
-            <DetailRow label="Coordinator" value={current.coordinatorId?.name} />
-            <DetailRow
-              label="Registered Date"
-              value={
-                current.createdAt
-                  ? new Date(current.createdAt).toLocaleDateString()
-                  : "-"
-              }
-            />
-          </div>
-        </div>
+        <MemberProfileSidebar
+          current={current}
+          editData={editData}
+          isEditing={isEditing}
+          coordinators={coordinators}
+          setEditData={setEditData}
+          toggleCategory={toggleCategory}
+          getTitlesForCategory={getTitlesForCategory}
+          setPhotoFile={setPhotoFile}
+          updateCategoryTitle={updateCategoryTitle}
+          addCategoryTitle={addCategoryTitle}
+          removeCategoryTitle={removeCategoryTitle}
+        />
 
         <div className="max-h-[calc(100vh-140px)] overflow-y-auto pr-2">
-          <Section title="Personal Information">
-            {isEditing ? (
-              <>
-                <EditableRow label="Full Name" value={editData?.personalInfo?.fullName} onChange={(v) => updateNested("personalInfo", "fullName", v)} />
-                <EditableRow label="Certificate Name" value={editData?.personalInfo?.certificateName} onChange={(v) => updateNested("personalInfo", "certificateName", v)} />
-                <EditableRow label="Name With Initials" value={editData?.personalInfo?.nameWithInitials} onChange={(v) => updateNested("personalInfo", "nameWithInitials", v)} />
-                <EditableRow label="NIC Number" value={editData?.personalInfo?.nicNumber} onChange={(v) => updateNested("personalInfo", "nicNumber", v)} />
-                <EditableRow label="Passport Number" value={editData?.personalInfo?.passportNumber} onChange={(v) => updateNested("personalInfo", "passportNumber", v)} />
-                <EditableRow label="Driving License" value={editData?.personalInfo?.drivingLicense} onChange={(v) => updateNested("personalInfo", "drivingLicense", v)} />
-                <EditableRow label="Gender" value={editData?.personalInfo?.gender} onChange={(v) => updateNested("personalInfo", "gender", v)} />
-                <EditableRow label="Marital Status" value={editData?.personalInfo?.maritalStatus} onChange={(v) => updateNested("personalInfo", "maritalStatus", v)} />
-                <EditableRow label="Date of Birth" type="date" value={editData?.personalInfo?.dateOfBirth?.slice(0, 10)} onChange={(v) => updateNested("personalInfo", "dateOfBirth", v)} />
-              </>
-            ) : (
-              <>
-                <DetailRow label="Full Name" value={current.personalInfo?.fullName} />
-                <DetailRow label="Certificate Name" value={current.personalInfo?.certificateName} />
-                <DetailRow label="Name With Initials" value={current.personalInfo?.nameWithInitials} />
-                <DetailRow label="NIC Number" value={current.personalInfo?.nicNumber} />
-                <DetailRow label="Passport Number" value={current.personalInfo?.passportNumber} />
-                <DetailRow label="Driving License" value={current.personalInfo?.drivingLicense} />
-                <DetailRow label="Gender" value={current.personalInfo?.gender} />
-                <DetailRow label="Marital Status" value={current.personalInfo?.maritalStatus} />
-                <DetailRow label="Date of Birth" value={current.personalInfo?.dateOfBirth ? new Date(current.personalInfo.dateOfBirth).toLocaleDateString() : "-"} />
-              </>
-            )}
-          </Section>
+          <PersonalInfoSection
+            current={current}
+            editData={editData}
+            isEditing={isEditing}
+            updateNested={updateNested}
+          />
 
-          <Section title="Contact Information">
-            {isEditing ? (
-              <>
-                <EditableRow label="Mobile Phone" value={editData?.contact?.mobilePhone} onChange={(v) => updateNested("contact", "mobilePhone", v)} />
-                <EditableRow label="WhatsApp Number" value={editData?.contact?.whatsappNumber} onChange={(v) => updateNested("contact", "whatsappNumber", v)} />
-                <EditableRow label="Email" value={editData?.contact?.email} onChange={(v) => updateNested("contact", "email", v)} />
-              </>
-            ) : (
-              <>
-                <DetailRow label="Mobile Phone" value={current.contact?.mobilePhone} />
-                <DetailRow label="WhatsApp Number" value={current.contact?.whatsappNumber} />
-                <DetailRow label="Email" value={current.contact?.email} />
-              </>
-            )}
-          </Section>
+          <ContactInfoSection
+            current={current}
+            editData={editData}
+            isEditing={isEditing}
+            updateNested={updateNested}
+          />
 
-          <Section title="Address Information">
-            {isEditing ? (
-              <>
-                <EditableRow label="Permanent Address" value={editData?.address?.permanentAddress} onChange={(v) => updateNested("address", "permanentAddress", v)} />
-                <EditableRow label="Province" value={editData?.address?.province} onChange={(v) => updateNested("address", "province", v)} />
-                <EditableRow label="District" value={editData?.address?.district} onChange={(v) => updateNested("address", "district", v)} />
-                <EditableRow label="Divisional Secretariat" value={editData?.address?.divisionalSecretariat} onChange={(v) => updateNested("address", "divisionalSecretariat", v)} />
-                <EditableRow label="Grama Niladhari Division" value={editData?.address?.gramaNiladhariDivision} onChange={(v) => updateNested("address", "gramaNiladhariDivision", v)} />
-                <EditableRow label="Police Division" value={editData?.address?.policeDivision} onChange={(v) => updateNested("address", "policeDivision", v)} />
-              </>
-            ) : (
-              <>
-                <DetailRow label="Permanent Address" value={current.address?.permanentAddress} />
-                <DetailRow label="Province" value={current.address?.province} />
-                <DetailRow label="District" value={current.address?.district} />
-                <DetailRow label="Divisional Secretariat" value={current.address?.divisionalSecretariat} />
-                <DetailRow label="Grama Niladhari Division" value={current.address?.gramaNiladhariDivision} />
-                <DetailRow label="Police Division" value={current.address?.policeDivision} />
-              </>
-            )}
-          </Section>
+          <AddressInfoSection
+            current={current}
+            editData={editData}
+            isEditing={isEditing}
+            updateNested={updateNested}
+          />
 
           {current.formType === "type1" ? (
-            <Section title="Professional Information">
-              {isEditing ? (
-                <>
-                  <EditableRow label="Job Status" value={editData?.professional?.jobStatus} onChange={(v) => updateNested("professional", "jobStatus", v)} />
-                  <EditableRow label="Work Experience" value={editData?.professional?.workExperience} onChange={(v) => updateNested("professional", "workExperience", v)} />
-                  <EditableRow label="Workplace Address" value={editData?.professional?.workplaceAddress} onChange={(v) => updateNested("professional", "workplaceAddress", v)} />
-                </>
-              ) : (
-                <>
-                  <DetailRow label="Job Status" value={current.professional?.jobStatus} />
-                  <DetailRow label="Work Experience" value={current.professional?.workExperience} />
-                  <DetailRow label="Workplace Address" value={current.professional?.workplaceAddress} />
-                </>
-              )}
-            </Section>
+            <ProfessionalInfoSection
+              current={current}
+              editData={editData}
+              isEditing={isEditing}
+              updateNested={updateNested}
+            />
           ) : (
-            <Section title="Business Information">
-              {isEditing ? (
-                <>
-                  <EditableRow label="Business Name" value={editData?.business?.name} onChange={(v) => updateNested("business", "name", v)} />
-                  <EditableRow label="About" value={editData?.business?.about} onChange={(v) => updateNested("business", "about", v)} />
-                  <EditableRow label="Business Registration Number" value={editData?.business?.registrationNumber} onChange={(v) => updateNested("business", "registrationNumber", v)} />
-                  <EditableRow label="Contact Number" value={editData?.business?.contactNumber} onChange={(v) => updateNested("business", "contactNumber", v)} />
-                  <EditableRow label="Business Email" value={editData?.business?.email} onChange={(v) => updateNested("business", "email", v)} />
-                  <EditableRow label="Website" value={editData?.business?.website} onChange={(v) => updateNested("business", "website", v)} />
-                  <EditableRow label="Started Year" value={editData?.business?.startedYear} onChange={(v) => updateNested("business", "startedYear", v)} />
-                  <EditableRow label="Business Address" value={editData?.business?.address} onChange={(v) => updateNested("business", "address", v)} />
-                  <EditableRow label="Number of Branches" value={editData?.business?.numberOfBranches} onChange={(v) => updateNested("business", "numberOfBranches", v)} />
-                  <EditableRow label="Portal Name" value={editData?.business?.portalName} onChange={(v) => updateNested("business", "portalName", v)} />
-                  <EditableRow label="Grade" value={editData?.business?.grade} onChange={(v) => updateNested("business", "grade", v)} />
-                </>
-              ) : (
-                <>
-                  <DetailRow label="Business Name" value={current.business?.name} />
-                  <DetailRow label="About" value={current.business?.about} />
-                  <DetailRow label="Business Registration Number" value={current.business?.registrationNumber} />
-                  <DetailRow label="Contact Number" value={current.business?.contactNumber} />
-                  <DetailRow label="Business Email" value={current.business?.email} />
-                  <DetailRow label="Website" value={current.business?.website} />
-                  <DetailRow label="Started Year" value={current.business?.startedYear} />
-                  <DetailRow label="Business Address" value={current.business?.address} />
-                  <DetailRow label="Number of Branches" value={current.business?.numberOfBranches} />
-                  <DetailRow label="Portal Name" value={current.business?.portalName} />
-                  <DetailRow label="Grade" value={current.business?.grade} />
-                </>
-              )}
-            </Section>
+            <BusinessInfoSection
+              current={current}
+              editData={editData}
+              isEditing={isEditing}
+              updateNested={updateNested}
+            />
           )}
         </div>
       </div>

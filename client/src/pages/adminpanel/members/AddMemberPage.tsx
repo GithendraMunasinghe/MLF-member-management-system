@@ -7,13 +7,13 @@ import { buildMemberPayload, createMemberFormData, } from "./utils/memberPayload
 import useMemberDraft from "./hooks/useMemberDraft";
 import useMemberData from "./hooks/useMemberData";
 
-import BasicInfoStep from "@/pages/adminpanel/members/components/BasicInfoStep";
-import PersonalInfoStep from "./components/PersonalInfoStep";
-import ContactInfoStep from "./components/ContactInfoStep";
-import AddressStep from "./components/AddressStep";
-import BusinessInfoStep from "./components/BusinessInfoStep";
-import ProfessionalInfoStep from "./components/ProfessionalInfoStep";
-import PhotoStep from "./components/PhotoStep";
+import BasicInfoStep from "@/pages/adminpanel/members/components/AddMemberPage/BasicInfoStep";
+import PersonalInfoStep from "./components/AddMemberPage/PersonalInfoStep";
+import ContactInfoStep from "./components/AddMemberPage/ContactInfoStep";
+import AddressStep from "./components/AddMemberPage/AddressStep";
+import BusinessInfoStep from "./components/AddMemberPage/BusinessInfoStep";
+import ProfessionalInfoStep from "./components/AddMemberPage/ProfessionalInfoStep";
+import PhotoStep from "./components/AddMemberPage/PhotoStep";
 
 export default function AddMemberPage() {
 
@@ -30,6 +30,7 @@ export default function AddMemberPage() {
     eventId: "",
 
     categories: [],
+    categoryTitles: [],
 
     coordinatorId: "",
 

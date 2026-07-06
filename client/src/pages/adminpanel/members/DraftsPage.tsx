@@ -9,6 +9,7 @@ interface DraftMember {
   regNo?: string;
   organizationType?: string;
   formType?: string;
+  categories?: string[];
   personalInfo?: {
     fullName?: string;
     nicNumber?: string;

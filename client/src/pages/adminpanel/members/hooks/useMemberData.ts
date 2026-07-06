@@ -88,6 +88,9 @@ export default function useMemberData({
           formType: draft.formType || "type1",
 
           eventId: draft.eventId?._id || draft.eventId || "",
+          categories: draft.categories || [],
+          categoryTitles: draft.categoryTitles || [],
+
           coordinatorId: draft.coordinatorId?._id || draft.coordinatorId || "",
 
           regNo: draft.regNo || "",

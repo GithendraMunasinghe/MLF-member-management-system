@@ -9,6 +9,7 @@ export const buildMemberPayload = (
 
     eventId: formData.eventId,
     categories: formData.categories || [],
+    categoryTitles: formData.categoryTitles || [],
 
     coordinatorId: formData.coordinatorId,
 

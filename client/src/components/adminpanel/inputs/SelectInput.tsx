@@ -11,6 +11,9 @@ interface Props {
   value?: string;
   onChange?: (value: string) => void;
   disabled?: boolean;
+  hideLabel?: boolean;
+  size?: "default" | "sm";
+  compact?: boolean;
 }
 
 export default function SelectInput({
@@ -19,19 +22,29 @@ export default function SelectInput({
   value = "",
   onChange,
   disabled = false,
+  hideLabel = false,
+  size = "default",
+  compact = false,
 }: Props) {
+  const selectSizeClass =
+    size === "sm"
+      ? "px-3 py-2 text-sm"
+      : "p-3";
+
   return (
-    <div className="flex flex-col gap-1">
-      <label className="text-sm text-gray-500 font-medium">
-        {label}
-      </label>
+    <div className={`flex flex-col ${compact ? "gap-0 mt-1" : "gap-1"}`}>
+      {!hideLabel && (
+        <label className="text-sm text-gray-500 font-medium">
+          {label}
+        </label>
+      )}
 
       <div className="relative">
         <select
           value={value}
-          className="
+          className={`
             w-full
-            p-3
+            ${selectSizeClass}
             pr-10
             border
             rounded-lg
@@ -42,7 +55,7 @@ export default function SelectInput({
             disabled:bg-gray-100
             disabled:cursor-not-allowed
             bg-white
-          "
+          `}
           onChange={(e) => onChange?.(e.target.value)}
           disabled={disabled}
         >

@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash, Plus, Eye } from "lucide-react";
-import EditMemberModal from "./modals/EditMemberModal";
 import { Member } from "@/types/member";
 import DeleteMemberModal from "./modals/DeleteMemberModal";
 import { useToast } from "@/components/ui/use-toast";
@@ -265,17 +264,6 @@ export default function MembersTable() {
 
                       <Button
                         size="icon"
-                        className="bg-green-500 hover:bg-green-600 text-white h-8 w-8"
-                        onClick={() => {
-                          setSelectedMember(member);
-                          setShowEditModal(true);
-                        }}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-
-                      <Button
-                        size="icon"
                         className="bg-red-500 hover:bg-red-600 text-white h-8 w-8"
                         onClick={() => {
                           setSelectedId(member._id);
@@ -357,14 +345,6 @@ export default function MembersTable() {
           </div>
         )}        
       </div>
-
-      {showEditModal && selectedMember && (
-        <EditMemberModal
-          member={selectedMember} 
-          onClose={() => setShowEditModal(false)}
-          onUpdated={fetchMembers}
-        />
-      )}
 
       {showModal && (
         <DeleteMemberModal
