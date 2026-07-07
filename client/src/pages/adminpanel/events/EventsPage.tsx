@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Trash } from "lucide-react";
+import { Plus, Pencil, Trash, Eye } from "lucide-react";
 import { API_URL } from "@/config/api";
 import AddEventModal from "@/components/adminpanel/modals/AddEventModal";
 import EditEventModal from "@/components/adminpanel/modals/EditEventModal";
 import DeleteEventModal from "@/components/adminpanel/modals/DeleteEventModal";
 import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface Organization {
   _id: string;
@@ -31,15 +32,16 @@ export default function EventsPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
-  
+
   const { toast } = useToast();
+  const navigate = useNavigate();
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   const fetchEvents = async () => {
     try {
       setLoading(true);
-
       const res = await axios.get(`${API_URL}/api/events`);
       setEvents(res.data);
     } catch (err) {
@@ -98,78 +100,83 @@ export default function EventsPage() {
   const visibleEvents =
     activeTab === "upcoming" ? upcomingEvents : pastEvents;
 
+  const openEventMembersPage = (eventId: string) => {
+    navigate(`/admin-dashboard/events/${eventId}/members`);
+  };
+
   const openEditModal = (event: EventItem) => {
     setSelectedEvent(event);
     setShowEditModal(true);
   };
 
   const openDeleteModal = (event: EventItem) => {
-  setSelectedEvent(event);
-  setShowDeleteModal(true);
-};
+    setSelectedEvent(event);
+    setShowDeleteModal(true);
+  };
 
-const handleDeleteEvent = async () => {
-  if (!selectedEvent) return;
+  const handleDeleteEvent = async () => {
+    if (!selectedEvent) return;
 
-  try {
-    setDeleting(true);
+    try {
+      setDeleting(true);
 
-    await axios.delete(`${API_URL}/api/events/${selectedEvent._id}`);
+      await axios.delete(`${API_URL}/api/events/${selectedEvent._id}`);
 
-    setEvents((prev) =>
-      prev.filter((event) => event._id !== selectedEvent._id)
-    );
+      setEvents((prev) =>
+        prev.filter((event) => event._id !== selectedEvent._id)
+      );
 
-    toast({
-      title: "Deleted",
-      description: "Event deleted successfully.",
-      variant: "success",
-    });
+      toast({
+        title: "Deleted",
+        description: "Event deleted successfully.",
+        variant: "success",
+      });
 
-    setShowDeleteModal(false);
-    setSelectedEvent(null);
-  } catch (err: any) {
-    toast({
-      title: "Delete failed",
-      description:
-        err.response?.data?.message ||
-        err.response?.data?.error ||
-        "Failed to delete event.",
-      variant: "destructive",
-    });
-  } finally {
-    setDeleting(false);
-  }
-};
+      setShowDeleteModal(false);
+      setSelectedEvent(null);
+    } catch (err: any) {
+      toast({
+        title: "Delete failed",
+        description:
+          err.response?.data?.message ||
+          err.response?.data?.error ||
+          "Failed to delete event.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   return (
     <>
       <div className="flex-1 flex flex-col bg-white rounded-xl p-6 border border-gray-200">
-        <div className="flex items-center justify-between border-b border-gray-300 mb-8">
-          <div className="flex">
-            <button
-              onClick={() => setActiveTab("upcoming")}
-              className={`px-5 py-2 text-sm font-medium border-b-2 ${
-                activeTab === "upcoming"
-                  ? "bg-gray-200 border-black text-black"
-                  : "border-transparent text-gray-600"
-              }`}
-            >
-              UPCOMING EVENTS
-            </button>
 
-            <button
-              onClick={() => setActiveTab("past")}
-              className={`px-5 py-2 text-sm font-medium border-b-2 ${
-                activeTab === "past"
-                  ? "bg-gray-200 border-black text-black"
-                  : "border-transparent text-gray-600"
-              }`}
-            >
-              Past Events
-            </button>
-          </div>
+      <div className="border-b border-gray-300 mb-8 pb-3">
+        <div className="flex gap-2 overflow-x-auto">
+          <button
+            onClick={() => setActiveTab("upcoming")}
+            className={`px-5 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-200 ${
+              activeTab === "upcoming"
+                ? "bg-[#1c1c1c] text-white shadow-sm"
+                : "bg-white text-gray-600 hover:bg-gray-100 hover:text-black"
+            }`}
+          >
+            UPCOMING EVENTS
+          </button>
+
+          <button
+            onClick={() => setActiveTab("past")}
+            className={`px-5 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-200 ${
+              activeTab === "past"
+                ? "bg-[#1c1c1c] text-white shadow-sm"
+                : "bg-white text-gray-600 hover:bg-gray-100 hover:text-black"
+            }`}
+          >
+            PAST EVENTS
+          </button>
         </div>
+      </div>
 
         <div className="flex items-start justify-between mb-4">
           <div>
@@ -228,7 +235,9 @@ const handleDeleteEvent = async () => {
                   <p className="text-sm text-gray-600 mt-3">
                     Event Date :{" "}
                     <span className="font-medium text-gray-800">
-                      {event.date ? new Date(event.date).toLocaleDateString() : "-"}
+                      {event.date
+                        ? new Date(event.date).toLocaleDateString()
+                        : "-"}
                     </span>
                   </p>
 
@@ -237,6 +246,14 @@ const handleDeleteEvent = async () => {
                   </p>
 
                   <div className="flex items-center justify-center gap-3 mt-5">
+                    <Button
+                      size="icon"
+                      className="bg-blue-500 hover:bg-blue-600 text-white h-9 w-9"
+                      onClick={() => openEventMembersPage(event._id)}
+                    >
+                      <Eye size={16} />
+                    </Button>
+
                     <Button
                       size="icon"
                       className="bg-green-500 hover:bg-green-600 text-white h-9 w-9"
@@ -312,6 +329,14 @@ const handleDeleteEvent = async () => {
                     <div className="flex gap-2">
                       <Button
                         size="icon"
+                        className="bg-blue-500 hover:bg-blue-600 text-white h-8 w-8"
+                        onClick={() => openEventMembersPage(event._id)}
+                      >
+                        <Eye size={14} />
+                      </Button>
+
+                      <Button
+                        size="icon"
                         className="bg-green-500 hover:bg-green-600 text-white h-8 w-8"
                         onClick={() => openEditModal(event)}
                       >
@@ -358,14 +383,14 @@ const handleDeleteEvent = async () => {
 
       {showDeleteModal && selectedEvent && (
         <DeleteEventModal
-            onClose={() => {
+          onClose={() => {
             setShowDeleteModal(false);
             setSelectedEvent(null);
-            }}
-            onConfirm={handleDeleteEvent}
-            loading={deleting}
+          }}
+          onConfirm={handleDeleteEvent}
+          loading={deleting}
         />
-        )}
+      )}
     </>
   );
 }

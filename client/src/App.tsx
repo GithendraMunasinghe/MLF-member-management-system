@@ -15,6 +15,7 @@ import DraftsPage from "./pages/adminpanel/members/DraftsPage";
 import CoordinatorsPage from "@/pages/adminpanel/coordinators/CoordinatorsPage";
 import EventsPage from "@/pages/adminpanel/events/EventsPage";
 import MemberProfilePage from "@/pages/adminpanel/members/MemberProfilePage";
+import EventCategoryMembersPage from "@/pages/adminpanel/events/EventCategoryMembersPage";
 
 import ProtectedRoute from "@/components/adminpanel/ProtectedRoute";
 import OrganizationsPage from "./pages/adminpanel/organizations/OrganizationsPage";
@@ -70,6 +71,10 @@ const App = () => (
             <Route
               path="/admin-dashboard/members/profile/:id"
               element={<MemberProfilePage />}
+            />
+            <Route
+              path="/admin-dashboard/events/:eventId/members"
+              element={<EventCategoryMembersPage />}
             />
             
             {/* <Route path="events" element={<Events />} /> */}

@@ -229,3 +229,167 @@ export const getEventStats = async (req, res) => {
     res.status(500).json({ message: "Failed to get stats" });
   }
 };
+
+// 7. Get members by event and category
+export const getEventMembersByCategory = async (req, res) => {
+  try {
+    const { eventId, category } = req.params;
+
+    const decodedCategory = decodeURIComponent(category);
+
+    const members = await Member.find({
+      eventId,
+      status: "completed",
+      categories: decodedCategory,
+    })
+      .populate("coordinatorId", "name coordinatorId")
+      .populate("organizationId", "name")
+      .populate("eventId", "name")
+      .sort({ createdAt: -1 });
+
+    const rows = [];
+
+    members.forEach((member) => {
+      const categoryTitleData = member.categoryTitles?.find(
+        (item) => item.category === decodedCategory
+      );
+
+      const titles = categoryTitleData?.titles?.filter(Boolean) || [];
+
+      if (titles.length > 0) {
+        titles.forEach((title) => {
+          rows.push({
+            memberId: member._id,
+            title,
+            category: decodedCategory,
+
+            regNo: member.regNo || "",
+            fullName: member.personalInfo?.fullName || "",
+            certificateName: member.personalInfo?.certificateName || "",
+            nameWithInitials: member.personalInfo?.nameWithInitials || "",
+            nicNumber: member.personalInfo?.nicNumber || "",
+            passportNumber: member.personalInfo?.passportNumber || "",
+            drivingLicense: member.personalInfo?.drivingLicense || "",
+            gender: member.personalInfo?.gender || "",
+            maritalStatus: member.personalInfo?.maritalStatus || "",
+            dateOfBirth: member.personalInfo?.dateOfBirth || "",
+
+            mobilePhone: member.contact?.mobilePhone || "",
+            whatsappNumber: member.contact?.whatsappNumber || "",
+            email: member.contact?.email || "",
+
+            permanentAddress: member.address?.permanentAddress || "",
+            province: member.address?.province || "",
+            district: member.address?.district || "",
+            divisionalSecretariat:
+              member.address?.divisionalSecretariat || "",
+            gramaNiladhariDivision:
+              member.address?.gramaNiladhariDivision || "",
+            policeDivision: member.address?.policeDivision || "",
+
+            coordinatorName: member.coordinatorId?.name || "",
+            coordinatorCode: member.coordinatorId?.coordinatorId || "",
+
+            organizationName: member.organizationId?.name || "",
+            eventName: member.eventId?.name || "",
+
+            formType: member.formType || "",
+            organizationType: member.organizationType || "",
+            batchNumber: member.batchNumber || "",
+            registeredYear: member.registeredYear || "",
+
+            businessName: member.business?.name || "",
+            businessRegistrationNumber:
+              member.business?.registrationNumber || "",
+            businessContactNumber: member.business?.contactNumber || "",
+            businessEmail: member.business?.email || "",
+            businessWebsite: member.business?.website || "",
+            businessStartedYear: member.business?.startedYear || "",
+            businessAddress: member.business?.address || "",
+            businessBranches: member.business?.numberOfBranches || "",
+            businessPortalName: member.business?.portalName || "",
+            businessGrade: member.business?.grade || "",
+
+            jobStatus: member.professional?.jobStatus || "",
+            workExperience: member.professional?.workExperience || "",
+            workplaceAddress: member.professional?.workplaceAddress || "",
+
+            registeredDate: member.createdAt,
+          });
+        });
+      } else {
+        rows.push({
+          memberId: member._id,
+          title: "",
+          category: decodedCategory,
+
+          regNo: member.regNo || "",
+          fullName: member.personalInfo?.fullName || "",
+          certificateName: member.personalInfo?.certificateName || "",
+          nameWithInitials: member.personalInfo?.nameWithInitials || "",
+          nicNumber: member.personalInfo?.nicNumber || "",
+          passportNumber: member.personalInfo?.passportNumber || "",
+          drivingLicense: member.personalInfo?.drivingLicense || "",
+          gender: member.personalInfo?.gender || "",
+          maritalStatus: member.personalInfo?.maritalStatus || "",
+          dateOfBirth: member.personalInfo?.dateOfBirth || "",
+
+          mobilePhone: member.contact?.mobilePhone || "",
+          whatsappNumber: member.contact?.whatsappNumber || "",
+          email: member.contact?.email || "",
+
+          permanentAddress: member.address?.permanentAddress || "",
+          province: member.address?.province || "",
+          district: member.address?.district || "",
+          divisionalSecretariat:
+            member.address?.divisionalSecretariat || "",
+          gramaNiladhariDivision:
+            member.address?.gramaNiladhariDivision || "",
+          policeDivision: member.address?.policeDivision || "",
+
+          coordinatorName: member.coordinatorId?.name || "",
+          coordinatorCode: member.coordinatorId?.coordinatorId || "",
+
+          organizationName: member.organizationId?.name || "",
+          eventName: member.eventId?.name || "",
+
+          formType: member.formType || "",
+          organizationType: member.organizationType || "",
+          batchNumber: member.batchNumber || "",
+          registeredYear: member.registeredYear || "",
+
+          businessName: member.business?.name || "",
+          businessRegistrationNumber:
+            member.business?.registrationNumber || "",
+          businessContactNumber: member.business?.contactNumber || "",
+          businessEmail: member.business?.email || "",
+          businessWebsite: member.business?.website || "",
+          businessStartedYear: member.business?.startedYear || "",
+          businessAddress: member.business?.address || "",
+          businessBranches: member.business?.numberOfBranches || "",
+          businessPortalName: member.business?.portalName || "",
+          businessGrade: member.business?.grade || "",
+
+          jobStatus: member.professional?.jobStatus || "",
+          workExperience: member.professional?.workExperience || "",
+          workplaceAddress: member.professional?.workplaceAddress || "",
+
+          registeredDate: member.createdAt,
+        });
+      }
+    });
+
+    res.json({
+      eventId,
+      category: decodedCategory,
+      count: rows.length,
+      members: rows,
+    });
+  } catch (err) {
+    console.error("Failed to get event members by category", err);
+    res.status(500).json({
+      message: "Failed to get event members by category",
+      error: err.message,
+    });
+  }
+};
