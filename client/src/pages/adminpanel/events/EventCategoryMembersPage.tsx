@@ -4,6 +4,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { API_URL } from "@/config/api";
+import Type1MembersTable from "./components/Type1MembersTable";
+import Type2MembersTable from "./components/Type2MembersTable";
 
 export default function EventCategoryMembersPage() {
   const { eventId } = useParams();
@@ -70,17 +72,12 @@ export default function EventCategoryMembersPage() {
     if (!keyword) return members;
 
     return members.filter((member) => {
-      return (
-        member.fullName?.toLowerCase().includes(keyword) ||
-        member.certificateName?.toLowerCase().includes(keyword) ||
-        member.regNo?.toLowerCase().includes(keyword) ||
-        member.nicNumber?.toLowerCase().includes(keyword) ||
-        member.mobilePhone?.toLowerCase().includes(keyword) ||
-        member.title?.toLowerCase().includes(keyword) ||
-        member.coordinatorName?.toLowerCase().includes(keyword)
-      );
+      return JSON.stringify(member).toLowerCase().includes(keyword);
     });
   }, [members, searchTerm]);
+
+  const isType1 = event?.organizationType === "Foundation";
+  const isType2 = event?.organizationType === "IBDF";
 
   if (loading) {
     return (
@@ -99,8 +96,7 @@ export default function EventCategoryMembersPage() {
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-white rounded-xl p-6 border border-gray-200">
-      {/* Header */}
+    <div className="flex-1 min-w-0 flex flex-col bg-white rounded-xl p-6 border border-gray-200 overflow-hidden">
       <div className="flex items-start gap-10 mb-6">
         <Button
           variant="outline"
@@ -118,14 +114,12 @@ export default function EventCategoryMembersPage() {
 
           <p className="text-sm text-gray-500 -mt-1">
             {event.organizationId?.name || "No Organization"}
-
             {event.date &&
               ` • ${new Date(event.date).toLocaleDateString()}`}
           </p>
         </div>
       </div>
 
-      {/* Category Navigation */}
       <div className="border-b border-gray-300 mb-8 pb-3">
         <div className="flex gap-2 overflow-x-auto">
           {event.categories?.map((category: string) => (
@@ -147,7 +141,6 @@ export default function EventCategoryMembersPage() {
         </div>
       </div>
 
-      {/* Toolbar */}
       <div className="flex items-center justify-between mb-4">
         <div className="relative w-full max-w-sm">
           <input
@@ -164,110 +157,19 @@ export default function EventCategoryMembersPage() {
         </Button>
       </div>
 
-      {/* Members Table */}
-      <div className="border border-gray-200 rounded-xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-[2200px] w-full border-collapse text-left text-sm">
-            <thead>
-              <tr className="bg-[#F2F2F2]">
-                <th className="px-4 py-3 border-b font-medium">Title</th>
-                <th className="px-4 py-3 border-b font-medium">Certificate Name</th>
-                <th className="px-4 py-3 border-b font-medium">Full Name</th>
-                <th className="px-4 py-3 border-b font-medium">Reg No</th>
-                <th className="px-4 py-3 border-b font-medium">NIC</th>
-                <th className="px-4 py-3 border-b font-medium">Passport</th>
-                <th className="px-4 py-3 border-b font-medium">Driving License</th>
-                <th className="px-4 py-3 border-b font-medium">Gender</th>
-                <th className="px-4 py-3 border-b font-medium">Marital Status</th>
-                <th className="px-4 py-3 border-b font-medium">Mobile</th>
-                <th className="px-4 py-3 border-b font-medium">WhatsApp</th>
-                <th className="px-4 py-3 border-b font-medium">Email</th>
-                <th className="px-4 py-3 border-b font-medium">Address</th>
-                <th className="px-4 py-3 border-b font-medium">District</th>
-                <th className="px-4 py-3 border-b font-medium">Coordinator</th>
-                <th className="px-4 py-3 border-b font-medium">Registered Date</th>
-              </tr>
-            </thead>
+      {isType1 && (
+        <Type1MembersTable
+          members={filteredMembers}
+          loading={membersLoading}
+        />
+      )}
 
-            <tbody>
-              {membersLoading ? (
-                <tr>
-                  <td
-                    colSpan={16}
-                    className="px-6 py-6 text-center text-gray-500"
-                  >
-                    Loading members...
-                  </td>
-                </tr>
-              ) : filteredMembers.length > 0 ? (
-                filteredMembers.map((member, index) => (
-                  <tr key={`${member.memberId}-${member.title}-${index}`} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 border-b whitespace-nowrap">
-                      {member.title || "-"}
-                    </td>
-                    <td className="px-4 py-3 border-b whitespace-nowrap">
-                      {member.certificateName || "-"}
-                    </td>
-                    <td className="px-4 py-3 border-b whitespace-nowrap">
-                      {member.fullName || "-"}
-                    </td>
-                    <td className="px-4 py-3 border-b whitespace-nowrap">
-                      {member.regNo || "-"}
-                    </td>
-                    <td className="px-4 py-3 border-b whitespace-nowrap">
-                      {member.nicNumber || "-"}
-                    </td>
-                    <td className="px-4 py-3 border-b whitespace-nowrap">
-                      {member.passportNumber || "-"}
-                    </td>
-                    <td className="px-4 py-3 border-b whitespace-nowrap">
-                      {member.drivingLicense || "-"}
-                    </td>
-                    <td className="px-4 py-3 border-b whitespace-nowrap">
-                      {member.gender || "-"}
-                    </td>
-                    <td className="px-4 py-3 border-b whitespace-nowrap">
-                      {member.maritalStatus || "-"}
-                    </td>
-                    <td className="px-4 py-3 border-b whitespace-nowrap">
-                      {member.mobilePhone || "-"}
-                    </td>
-                    <td className="px-4 py-3 border-b whitespace-nowrap">
-                      {member.whatsappNumber || "-"}
-                    </td>
-                    <td className="px-4 py-3 border-b whitespace-nowrap">
-                      {member.email || "-"}
-                    </td>
-                    <td className="px-4 py-3 border-b min-w-[260px]">
-                      {member.permanentAddress || "-"}
-                    </td>
-                    <td className="px-4 py-3 border-b whitespace-nowrap">
-                      {member.district || "-"}
-                    </td>
-                    <td className="px-4 py-3 border-b whitespace-nowrap">
-                      {member.coordinatorName || "-"}
-                    </td>
-                    <td className="px-4 py-3 border-b whitespace-nowrap">
-                      {member.registeredDate
-                        ? new Date(member.registeredDate).toLocaleDateString()
-                        : "-"}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan={16}
-                    className="px-6 py-6 text-center text-gray-500 italic"
-                  >
-                    No members found for this category.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {isType2 && (
+        <Type2MembersTable
+          members={filteredMembers}
+          loading={membersLoading}
+        />
+      )}
     </div>
   );
 }
