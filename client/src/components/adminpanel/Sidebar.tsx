@@ -126,7 +126,7 @@ export default function Sidebar() {
       {/* Footer */}
       {!collapsed && (
         <div className="p-4 text-xs text-white/50 border-t border-white/10">
-          © {new Date().getFullYear()} SRP System
+          © {new Date().getFullYear()} MLF ADMINISTRATION SYSTEM
         </div>
       )}
     </div>

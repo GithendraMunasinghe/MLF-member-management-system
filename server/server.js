@@ -8,7 +8,7 @@ import eventRoutes from './routes/eventRoutes.js';
 import memberRoutes from './routes/memberRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import coordinator from './routes/coordinatorRoutes.js';
-
+import titleOrderRoutes from "./routes/titleOrderRoutes.js";
 import path from 'path'
 
 dotenv.config();
@@ -36,6 +36,7 @@ app.use('/api/organizations', organizationRoutes);
 app.use('/api/events' , eventRoutes);
 app.use('/api/coordinators', coordinator);
 app.use('/api/members', memberRoutes);
+app.use("/api/title-orders", titleOrderRoutes);
 
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('MongoDB connected'))

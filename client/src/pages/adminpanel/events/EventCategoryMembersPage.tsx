@@ -7,9 +7,15 @@ import { API_URL } from "@/config/api";
 import Type1MembersTable from "./components/Type1MembersTable";
 import Type2MembersTable from "./components/Type2MembersTable";
 
+import { useToast } from "@/components/ui/use-toast";
+import exportMembersToExcel from "./utils/exportMembersToExcel";
+import { type1MemberColumns } from "./utils/type1MemberColumns";
+import { type2MemberColumns } from "./utils/type2MemberColumns";
+
 export default function EventCategoryMembersPage() {
   const { eventId } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const [event, setEvent] = useState<any>(null);
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -78,6 +84,44 @@ export default function EventCategoryMembersPage() {
 
   const isType1 = event?.organizationType === "Foundation";
   const isType2 = event?.organizationType === "IBDF";
+
+  const handleExportExcel = () => {
+  try {
+    if (filteredMembers.length === 0) {
+      toast({
+        title: "No Members",
+        description: "There are no members to export.",
+        variant: "destructive",
+      });
+
+      return;
+    }
+
+    exportMembersToExcel({
+      members: filteredMembers,
+      columns: isType1
+        ? type1MemberColumns
+        : type2MemberColumns,
+      eventName: event.name,
+      category: selectedCategory,
+    });
+
+    toast({
+      title: "Success",
+      description: "Excel file downloaded successfully.",
+      variant: "success",
+    });
+  } catch (err: any) {
+    console.error(err);
+
+    toast({
+      title: "Export Failed",
+      description:
+        err.message || "Failed to export Excel file.",
+      variant: "destructive",
+    });
+  }
+};
 
   if (loading) {
     return (
@@ -152,9 +196,12 @@ export default function EventCategoryMembersPage() {
           />
         </div>
 
-        <Button className="bg-green-600 hover:bg-green-700 text-white">
-          Download Excel
-        </Button>
+          <Button
+            className="bg-green-600 hover:bg-green-700 text-white"
+            onClick={handleExportExcel}
+          >
+            Download Excel
+          </Button>
       </div>
 
       {isType1 && (
