@@ -1,11 +1,17 @@
 import mongoose from "mongoose";
 
-const titleOrderMemberSchema = new mongoose.Schema(
+const categoryRowSchema = new mongoose.Schema(
   {
     memberId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Member",
       required: true,
+    },
+
+    title: {
+      type: String,
+      required: true,
+      trim: true,
     },
 
     order: {
@@ -17,7 +23,7 @@ const titleOrderMemberSchema = new mongoose.Schema(
   { _id: false }
 );
 
-const titleOrderSchema = new mongoose.Schema(
+const categoryRowOrderSchema = new mongoose.Schema(
   {
     eventId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -32,29 +38,25 @@ const titleOrderSchema = new mongoose.Schema(
       trim: true,
     },
 
-    title: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    members: {
-      type: [titleOrderMemberSchema],
+    rows: {
+      type: [categoryRowSchema],
       default: [],
     },
   },
   { timestamps: true }
 );
 
-titleOrderSchema.index(
+categoryRowOrderSchema.index(
   {
     eventId: 1,
     category: 1,
-    title: 1,
   },
   {
     unique: true,
   }
 );
 
-export default mongoose.model("TitleOrder", titleOrderSchema);
+export default mongoose.model(
+  "CategoryRowOrder",
+  categoryRowOrderSchema
+);

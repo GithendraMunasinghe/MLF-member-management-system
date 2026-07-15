@@ -4,6 +4,14 @@ export const type1MemberColumns: Column[] = [
   // Basic
   {
     group: "Basic Information",
+    key: "order",
+    label: "Order",
+    type: "number",
+    width: 100,
+    align: "center",
+  },
+  {
+    group: "Basic Information",
     key: "regNo",
     label: "Registration No.",
     width: 150,

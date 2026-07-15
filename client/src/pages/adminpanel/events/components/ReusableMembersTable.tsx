@@ -16,14 +16,23 @@ interface Props {
   members: any[];
   columns: Column[];
   loading: boolean;
+  isOrderEditing?: boolean;
+  orderValues?: Record<string, number>;
+  onOrderChange?: (rowKey: string, value: number) => void;
 }
 
 const ROWS_PER_PAGE = 10;
+
+const getRowKey = (member: any) =>
+  `${member.memberId || member._id}::${member.title || ""}`;
 
 export default function ReusableMembersTable({
   members,
   columns,
   loading,
+  isOrderEditing = false,
+  orderValues = {},
+  onOrderChange,
 }: Props) {
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -91,6 +100,13 @@ export default function ReusableMembersTable({
           <table className="border-collapse text-left text-sm">
             <thead>
               <tr className="bg-[#F2F2F2]">
+                <th
+                  style={{ minWidth: 110 }}
+                  className="px-4 py-3 border-b font-medium whitespace-nowrap bg-[#F2F2F2] text-center"
+                >
+                  Order
+                </th>
+
                 {columns.map((column) => (
                   <th
                     key={column.key}
@@ -111,45 +127,75 @@ export default function ReusableMembersTable({
               {loading ? (
                 <tr>
                   <td
-                    colSpan={columns.length}
+                    colSpan={columns.length + 1}
                     className="px-6 py-6 text-center text-gray-500"
                   >
                     Loading members...
                   </td>
                 </tr>
               ) : paginatedMembers.length > 0 ? (
-                paginatedMembers.map((member, index) => (
-                  <tr
-                    key={`${
-                      member._id || member.memberId
-                    }-${currentPage}-${index}`}
-                    className="hover:bg-gray-50"
-                  >
-                    {columns.map((column) => {
-                      const value = formatValue(member, column);
+                paginatedMembers.map((member, index) => {
+                  const rowKey = getRowKey(member);
+                  const displayedOrder =
+                    orderValues[rowKey] ?? member.order ?? startRow + index;
 
-                      return (
-                        <td
-                          key={column.key}
-                          title={String(value)}
-                          style={{
-                            minWidth: column.width || 160,
-                            maxWidth: column.width || 220,
-                          }}
-                          className={`px-4 py-3 border-b whitespace-nowrap overflow-hidden text-ellipsis ${getAlignmentClass(
-                            column
-                          )}`}
-                        >
-                          {value}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))
+                  return (
+                    <tr
+                      key={`${rowKey}-${currentPage}-${index}`}
+                      className="hover:bg-gray-50"
+                    >
+                      <td className="px-4 py-3 border-b text-center">
+                        {isOrderEditing ? (
+                          <input
+                            type="number"
+                            min={1}
+                            max={members.length}
+                            value={displayedOrder}
+                            onChange={(e) => {
+                              const value = Number(e.target.value);
+
+                              if (
+                                Number.isInteger(value) &&
+                                value > 0
+                              ) {
+                                onOrderChange?.(rowKey, value);
+                              }
+                            }}
+                            className="w-20 px-2 py-1.5 border rounded-lg text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        ) : (
+                          displayedOrder
+                            .toString()
+                            .padStart(3, "0")
+                        )}
+                      </td>
+
+                      {columns.map((column) => {
+                        const value = formatValue(member, column);
+
+                        return (
+                          <td
+                            key={column.key}
+                            title={String(value)}
+                            style={{
+                              minWidth: column.width || 160,
+                              maxWidth: column.width || 220,
+                            }}
+                            className={`px-4 py-3 border-b whitespace-nowrap overflow-hidden text-ellipsis ${getAlignmentClass(
+                              column
+                            )}`}
+                          >
+                            {value}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
                   <td
-                    colSpan={columns.length}
+                    colSpan={columns.length + 1}
                     className="px-6 py-6 text-center text-gray-500 italic"
                   >
                     No members found for this category.
